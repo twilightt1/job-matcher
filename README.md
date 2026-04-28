@@ -60,6 +60,7 @@ Services:
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
+python -m pip install --upgrade pip
 pip install -e ".[dev]"
 uvicorn app.main:app --reload
 ```
@@ -83,9 +84,10 @@ npm run dev
 
 ## Current Status
 
-Milestone 0 foundation is being implemented:
+Milestone 0-2 backend foundation is implemented:
 
 - FastAPI backend skeleton
 - Next.js frontend skeleton
 - PostgreSQL + pgvector Docker setup
-- Repository documentation and environment template
+- Structured resume/job parsing APIs
+- AI run diagnostics and test coverage
