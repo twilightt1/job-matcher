@@ -59,7 +59,8 @@ for alias, canonical in SKILL_ALIASES.items():
 
 def normalize_text(value: str) -> str:
     cleaned = re.sub(r"[^a-z0-9+#./]+", " ", value.lower())
-    return " ".join(cleaned.split())
+    tokens = [token.strip("./") for token in cleaned.split()]
+    return " ".join(token for token in tokens if token)
 
 
 def normalize_skill(skill: str) -> str:
