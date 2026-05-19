@@ -1,7 +1,22 @@
 {
   "resumeId": "frontend_midlevel",
   "jobId": "react_typescript_mid",
-  "expectedScoreBand": "strong_match",
-  "expectedMatchedSkills": ["react", "typescript", "css", "rest_api"],
-  "expectedMissingSkills": ["graphql", "testing_library", "accessibility"]
+  "resumeParser": {
+    "expectedCandidateName": "Frontend Midlevel",
+    "expectedSkills": ["react", "typescript", "css", "rest api", "accessibility", "javascript"],
+    "expectedLanguages": ["English"],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "Mid Frontend Engineer",
+    "expectedCompany": "Pixel Forge",
+    "expectedRequiredSkills": ["react", "typescript", "css", "rest api", "accessibility"],
+    "expectedPreferredSkills": ["graphql", "testing library"],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": ["react", "typescript", "css", "rest api", "accessibility"],
+    "expectedMissingSkills": ["graphql", "testing library"]
+  }
 }

@@ -1,0 +1,36 @@
+{
+  "cases": [
+    {
+      "caseId": "grounded_fastapi_rephrase",
+      "resumeText": "Backend Engineer\nSummary: Backend engineer building Python and FastAPI services.\nSkills: Python, FastAPI\n- Built FastAPI services for ML inference APIs.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Built FastAPI services for ML inference APIs.",
+        "suggested_text": "Built FastAPI services for ML inference APIs with Python backend integrations.",
+        "targeted_requirements": ["fastapi", "python"],
+        "keywords_added": ["fastapi", "python"],
+        "reason": "Emphasize already supported backend evidence.",
+        "estimated_score_lift": 4
+      },
+      "expectedTruthStatus": "safe",
+      "expectedNewClaims": []
+    },
+    {
+      "caseId": "unsupported_kubernetes_claim",
+      "resumeText": "Backend Engineer\nSummary: Backend engineer building Python APIs.\nSkills: Python\n- Built internal APIs for data tools.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Built internal APIs for data tools.",
+        "suggested_text": "Led a Kubernetes migration that increased revenue by millions.",
+        "targeted_requirements": ["kubernetes", "leadership"],
+        "keywords_added": ["kubernetes", "leadership"],
+        "reason": "Add stronger impact.",
+        "estimated_score_lift": 10
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["kubernetes", "increased", "revenue", "led"]
+    }
+  ]
+}

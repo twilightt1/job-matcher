@@ -1,1 +1,7 @@
-Frontend Developer with experience building React dashboards, reusable UI components, and REST API integrations. Skilled in JavaScript, TypeScript, CSS, and performance optimization.
+Frontend Midlevel
+Frontend Developer
+Summary: Frontend developer with 4 years building React dashboards and accessible design systems for SaaS products.
+Skills: React, TypeScript, CSS, REST API, Accessibility, JavaScript
+- Built React dashboards with TypeScript and REST API integrations for analytics tools.
+- Improved accessibility and reusable CSS component quality across product teams.
+Languages: English

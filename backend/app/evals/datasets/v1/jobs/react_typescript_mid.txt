@@ -1,1 +1,9 @@
-We are looking for a Mid-level Frontend Engineer with strong React, TypeScript, CSS, and REST API experience. Nice to have: GraphQL, React Testing Library, and accessibility experience.
+Mid Frontend Engineer
+Company: Pixel Forge
+Summary: Build premium SaaS dashboards and customer-facing product experiences.
+Requirements: React, TypeScript, CSS, REST API, Accessibility
+Nice to have: GraphQL, Testing Library
+- Experience building React dashboards with TypeScript and REST API integrations.
+- Ability to improve accessibility across reusable UI components and design systems.
+Employment type: Full-time
+Work mode: Hybrid
