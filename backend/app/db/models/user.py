@@ -30,3 +30,4 @@ class User(Base):
     jobs = relationship("Job", back_populates="user")
     match_reports = relationship("MatchReport", back_populates="user")
     ai_runs = relationship("AIRun", back_populates="user")
+    eval_runs = relationship("EvalRun", back_populates="user")
