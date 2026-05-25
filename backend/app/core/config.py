@@ -15,7 +15,7 @@ class Settings(BaseSettings):
         alias="DATABASE_URL",
     )
     sync_database_url: str = Field(
-        default="postgresql://jobfit:jobfit@localhost:5432/jobfit",
+        default="postgresql+psycopg://jobfit:jobfit@localhost:5432/jobfit",
         alias="SYNC_DATABASE_URL",
     )
     backend_cors_origins: list[str] = Field(
