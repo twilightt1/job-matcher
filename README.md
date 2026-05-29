@@ -84,10 +84,14 @@ npm run dev
 
 ## Current Status
 
-Milestone 0-2 backend foundation is implemented:
+Milestone 0–6 backend foundation is implemented (see [docs/prd.md](docs/prd.md)):
 
-- FastAPI backend skeleton
+- FastAPI backend skeleton + CORS configuration
 - Next.js frontend skeleton
 - PostgreSQL + pgvector Docker setup
-- Structured resume/job parsing APIs
-- AI run diagnostics and test coverage
+- Schema-first resume/job parsing APIs (local parser + AIRun logging)
+- Deterministic match engine with skill normalization and evidence rows
+- Truth-guard classification for resume rewrite suggestions
+- AI run / AI output observability tables and parse-diagnostics endpoints
+- Evaluation harness (CLI runner, datasets, metrics, markdown report)
+- Alembic initial migration applied
