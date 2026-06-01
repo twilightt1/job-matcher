@@ -17,6 +17,9 @@ class ResumeRead(BaseModel):
 
     id: str
     title: str
+    source_type: str = "text"
+    original_file_url: str | None = None
+    original_file_key: str | None = None
     raw_text: str
     parse_status: str
     parse_confidence: float | None

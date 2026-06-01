@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.pipeline import parse_resume_record
 from app.api.deps import get_db_session
+from app.core.config import Settings, get_settings
 from app.db.models.enums import AITaskType, ParseStatus
 from app.db.repositories.ai_run_repository import list_ai_runs_for_session
 from app.db.repositories.resume_repository import create_resume, get_resume
@@ -13,8 +16,11 @@ from app.schemas.parsing import (
     ResumeParseRequest,
 )
 from app.schemas.resume import ResumeCreate, ResumeRead
+from app.services.ingestion.extractors import IngestionError
+from app.services.ingestion.workflow import create_resume_from_upload, ingestion_http_error
 
 DbSession = Depends(get_db_session)
+SettingsDep = Depends(get_settings)
 
 router = APIRouter(prefix="/api/resumes", tags=["resumes"])
 
@@ -25,6 +31,29 @@ async def create_resume_endpoint(
     session: AsyncSession = DbSession,
 ) -> ResumeRead:
     resume = await create_resume(session, payload)
+    return ResumeRead.model_validate(resume)
+
+
+@router.post("/upload", response_model=ResumeRead, status_code=status.HTTP_201_CREATED)
+async def upload_resume_endpoint(
+    file: Annotated[UploadFile, File(description="Resume PDF, DOCX, or TXT file")],
+    title: Annotated[str | None, Form(max_length=255)] = None,
+    session_id: Annotated[str | None, Form(max_length=120)] = None,
+    parse_immediately: Annotated[bool, Form()] = False,
+    session: AsyncSession = DbSession,
+    settings: Settings = SettingsDep,
+) -> ResumeRead:
+    try:
+        resume = await create_resume_from_upload(
+            session,
+            file=file,
+            settings=settings,
+            title=title,
+            session_id=session_id,
+            parse_immediately=parse_immediately,
+        )
+    except IngestionError as exc:
+        raise ingestion_http_error(exc) from exc
     return ResumeRead.model_validate(resume)
 
 

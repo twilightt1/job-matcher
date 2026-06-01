@@ -1,6 +1,7 @@
 """Pydantic API schemas."""
 
-from app.schemas.job import JobCreate, JobRead
+from app.schemas.analyze import AnalyzeRead
+from app.schemas.job import JobCreate, JobFromUrlCreate, JobRead
 from app.schemas.match_report import MatchEvidenceRead, MatchReportCreate, MatchReportRead
 from app.schemas.optimization import (
     OptimizationCreate,
@@ -19,7 +20,9 @@ from app.schemas.resume import ResumeCreate, ResumeRead
 
 __all__ = [
     "AIRunRead",
+    "AnalyzeRead",
     "JobCreate",
+    "JobFromUrlCreate",
     "JobParseRead",
     "JobParseRequest",
     "JobRead",
