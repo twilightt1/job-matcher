@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 
 from app.ai.clients.base import ParsedResumeResult, ResumeParserClient
+from app.ai.languages import detect_supported_languages
 from app.ai.schemas import ResumeContact, ResumeEducationItem, ResumeExtraction
 
 
@@ -116,8 +117,7 @@ class LocalResumeParserClient(ResumeParserClient):
         )
 
     def _extract_languages(self, lower_text: str) -> list[str]:
-        known_languages = ["english", "vietnamese", "japanese", "french", "german"]
-        return [language.title() for language in known_languages if language in lower_text]
+        return detect_supported_languages(lower_text)
 
     def _extract_certifications(self, lines: list[str]) -> list[str]:
         certifications: list[str] = []

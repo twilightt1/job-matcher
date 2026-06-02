@@ -1,30 +1,86 @@
-# JobFit AI — AI Job Match & Resume Optimizer
+# JobFit AI — AI Resume Match & Optimization Product Demo
 
-JobFit AI is a portfolio-grade AI/ML engineering project that combines document ingestion, structured LLM extraction, explainable scoring, and truth-guarded resume optimization.
+JobFit AI is a product-style AI engineering project that turns a resume and a job description into an explainable match report, evidence-backed gaps, ATS keyword coverage, and truth-guarded resume rewrite suggestions.
+
+It is intentionally scoped as a **portfolio/CV-ready product demo**, not a full SaaS platform. The goal is to demonstrate end-to-end AI product engineering: practical document ingestion, schema-first extraction, deterministic scoring, AI safety guardrails, observability foundations, and a polished Next.js user experience.
+
+## Product Story
+
+Most resume tools produce generic feedback or rewrite text without proving whether the candidate actually has the underlying experience. JobFit AI focuses on a safer workflow:
+
+1. Accept real-world resume/JD inputs.
+2. Extract structured signals from both sides.
+3. Score the fit with transparent evidence rows.
+4. Highlight strengths, gaps, and missing ATS keywords.
+5. Suggest resume improvements while flagging unsupported claims.
+6. Present the result in a shareable report page.
+
+## Demo Flow
+
+```text
+Open /analyze
+  -> use the built-in EN/VI/ZH/JA demo data or upload real files
+  -> submit the no-account analysis flow
+  -> backend runs ingest -> parse -> match -> optimize -> truth guard
+  -> open /reports/{id}
+  -> share or export the report as Markdown
+```
+
+Main frontend routes:
+
+- `/` — product landing page
+- `/analyze` — no-account CV/JD analysis workbench
+- `/reports/{id}` — shareable report detail page
+- `/diagnostics` — AI pipeline/observability explainer page
+
+## Key Features
+
+| Area | What it demonstrates |
+| --- | --- |
+| Document ingestion | Resume/JD input via pasted text, PDF, DOCX, TXT, Markdown, or public JD URL |
+| Explainable scoring | Deterministic skill/requirement/experience/language breakdown with persisted evidence rows |
+| Language support | English, Vietnamese, Chinese, and Japanese detection for resume/JD language matching |
+| Resume optimization | Rewrite suggestions tied to match gaps and estimated score lift |
+| Truth guard | Suggestions classified as `safe`, `needs_review`, or `unsupported` to avoid invented claims |
+| Product UX | Polished landing page, live analyze workflow, sticky report actions, markdown export |
+| AI observability | AI run/output tables, parse diagnostics, prompt-version-ready architecture |
+| Evaluation foundation | Smoke datasets and CLI runner for parser, matching, and truth-guard checks |
 
 ## Architecture
 
 ```text
-frontend/  Next.js product UI with a live analyze workflow
-backend/   Python FastAPI API + ingestion + AI/ML pipeline
-docs/      Product, architecture, API, and evaluation docs
-infra/     Docker and infrastructure helpers
+frontend/  Next.js 14 App Router product UI
+backend/   FastAPI API, ingestion services, AI pipeline, scoring, guardrails
+backend/app/db/  SQLAlchemy models for resumes, jobs, reports, evidence, AI runs, evals
+infra/     Dockerfiles, Docker Compose, pgvector init script
+docs/      PRD, architecture, prompt/eval docs, case study, CV summary
 ```
 
-## MVP Flow
+Runtime flow:
 
 ```text
-Upload resume PDF/DOCX/TXT or paste resume text
-  -> Provide a JD via pasted text, public URL, PDF, DOCX, or TXT
-  -> Extract and validate source text
-  -> Parse both into structured JSON
-  -> Normalize skills
-  -> Retrieve semantic evidence
-  -> Calculate explainable match score
-  -> Generate optimization suggestions
-  -> Run truth guard
-  -> Show a portfolio-ready report
+Next.js /analyze
+  -> POST /api/analyze multipart form
+  -> ingestion layer extracts file/text/url content
+  -> local parser creates resume/job structured JSON
+  -> deterministic match engine creates MatchReport + MatchEvidence
+  -> optimizer creates RewriteSuggestion rows
+  -> truth guard labels suggestion safety
+  -> Next.js /reports/{id} reads and presents the final report
 ```
+
+## Tech Stack
+
+| Layer | Stack |
+| --- | --- |
+| Frontend | Next.js 14 App Router, React 18, TypeScript, vanilla CSS |
+| Backend | FastAPI, SQLAlchemy 2 async, Pydantic, Alembic |
+| Database | PostgreSQL 16, pgvector-ready schema, JSONB report storage |
+| AI pipeline | Local deterministic parsers/optimizer by default, prompt/provider abstractions reserved |
+| Ingestion | PDF/DOCX/TXT extraction, SSRF-aware public URL fetcher |
+| Quality | TypeScript strict mode, Ruff/Mypy/Pytest backend config, eval harness |
+
+> The live matching flow currently uses deterministic keyword/alias scoring. The pgvector schema is present for future semantic evidence retrieval, but runtime vector retrieval is not required for the current product demo.
 
 ## Local Development
 
@@ -32,7 +88,7 @@ Upload resume PDF/DOCX/TXT or paste resume text
 
 - Node.js 20+
 - Python 3.11+
-- Docker Desktop
+- Docker Desktop, if running the full backend/PostgreSQL stack
 
 ### Environment
 
@@ -42,15 +98,15 @@ Copy the environment template:
 cp .env.example .env
 ```
 
-Key ingestion settings are included in `.env.example`:
+Important defaults:
 
-- `UPLOAD_STORAGE_DIR=storage/uploads`
-- `MAX_UPLOAD_BYTES=10000000`
-- `URL_FETCH_TIMEOUT_SECONDS=10`
-- `MAX_URL_RESPONSE_BYTES=2000000`
-- `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`
+```text
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+DATABASE_URL=postgresql+asyncpg://jobfit:jobfit@localhost:5432/jobfit
+BACKEND_CORS_ORIGINS=http://localhost:3000
+```
 
-### Start with Docker Compose
+### Full stack with Docker Compose
 
 ```bash
 docker compose up --build
@@ -63,17 +119,6 @@ Services:
 - API docs: <http://localhost:8000/docs>
 - PostgreSQL: `localhost:5432`
 
-### Backend only
-
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install -e ".[dev]"
-uvicorn app.main:app --reload
-```
-
 ### Frontend only
 
 ```bash
@@ -82,43 +127,61 @@ npm install
 npm run dev
 ```
 
-Open the live analyze UI at <http://localhost:3000/analyze>.
+If Next.js shows a stale cache/runtime error after major changes, run:
 
-## Key API Endpoints
+```bash
+npm run dev:clean
+```
 
-- `POST /api/resumes` — create resume from pasted text
-- `POST /api/resumes/upload` — upload resume PDF/DOCX/TXT
-- `POST /api/jobs` — create JD from pasted text
-- `POST /api/jobs/upload` — upload JD PDF/DOCX/TXT
-- `POST /api/jobs/from-url` — fetch and extract a public JD URL
+Validation commands:
+
+```bash
+cd frontend
+npm run typecheck
+npm run build
+# or
+npm run verify
+```
+
+### Backend only
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+## API Surface
+
 - `POST /api/analyze` — one-shot resume + JD ingestion, parsing, matching, and optimization
-- `GET /api/match-reports/{id}` — read explainable report + evidence rows
-- `GET /api/optimizations/{id}` — read optimized resume + guarded suggestions
+- `GET /api/match-reports/{id}` — read report + evidence rows
+- `POST /api/optimizations` — idempotently create/read optimization for a report
+- `GET /api/resumes/{id}` — read resume source + parsed JSON
+- `GET /api/jobs/{id}` — read job source + parsed JSON
+- `GET /health` — backend health check
 
-## Portfolio Highlights
+## Portfolio / CV Positioning
 
-- **Document ingestion** for resume/JD PDF, DOCX, TXT, and Markdown text sources.
-- **SSRF-aware JD URL fetcher** for public HTML/text job pages.
-- **One-shot AI analyze workflow** from source material to match report and optimization.
-- **Schema-first LLM extraction** for resumes and job descriptions.
-- **Explainable matching** with evidence rows and confidence values.
-- **Deterministic scoring** separated from LLM text generation.
-- **Truth guard** to flag unsupported resume claims.
-- **AI run logging** for model, prompt version, latency, tokens, and cost.
-- **Evaluation harness** for extraction, matching, and hallucination metrics.
+Suggested project line:
 
-## Current Status
+> Built JobFit AI, an AI-powered resume-to-job matching product that ingests resumes and job descriptions, extracts structured signals, generates explainable match reports, and produces truth-guarded optimization suggestions using Next.js, FastAPI, PostgreSQL, and schema-first AI pipelines.
 
-Milestone 0–6 backend foundation plus the ingestion upgrade are implemented (see [docs/prd.md](docs/prd.md)):
+Impact bullets:
 
-- FastAPI backend skeleton + CORS configuration
-- Next.js frontend skeleton with a live `/analyze` upload/link workflow
-- PostgreSQL + pgvector Docker setup
-- Schema-first resume/job parsing APIs (local parser + AIRun logging)
-- PDF/DOCX/TXT upload ingestion and safe public JD URL extraction
-- One-shot analyze endpoint that runs parse → match → optimize
-- Deterministic match engine with skill normalization and evidence rows
-- Truth-guard classification for resume rewrite suggestions
-- AI run / AI output observability tables and parse-diagnostics endpoints
-- Evaluation harness (CLI runner, datasets, metrics, markdown report)
-- Alembic initial migration applied
+- Designed an end-to-end CV/JD analysis pipeline from document ingestion to shareable report UX.
+- Implemented explainable deterministic scoring with persisted requirement-level evidence rows.
+- Built truth-guarded resume rewrite suggestions to reduce unsupported or hallucinated claims.
+- Created a polished no-account product demo with markdown export and reusable API/type layers.
+- Added AI observability and evaluation foundations for prompt/schema quality tracking.
+
+More detail:
+
+- [Case study](docs/case_study.md)
+- [CV summary](docs/cv_summary.md)
+- [PRD](docs/prd.md)
+- [Technical architecture](docs/technical_architecture.md)
+- [Evaluation plan](docs/evaluation_plan.md)

@@ -14,10 +14,10 @@ suggestions.
 
 - **Tên sản phẩm:** JobFit AI — AI Job Match & Resume Optimizer
 - **Loại sản phẩm:** Split-frontend/backend web app với REST API
-- **Phiên bản hiện tại:** 0.2.0 (Milestone 0–6 + ingestion/analyze upgrade)
-- **Mục tiêu:** Demonstrate kỹ năng AI engineering: document ingestion,
-  schema-first extraction, skill normalization, explainable scoring, truth guard,
-  observability, evals.
+- **Phiên bản hiện tại:** 0.3.0 (product-demo package)
+- **Mục tiêu:** Present JobFit AI as a CV/portfolio-ready AI product demo:
+  document ingestion, schema-first extraction, skill normalization, explainable
+  scoring, truth guard, observability, evals, and polished shareable UX.
 
 ## 2. Target Users / Đối tượng người dùng
 
@@ -37,10 +37,13 @@ suggestions.
 - JD input: pasted text, upload PDF/DOCX/TXT/MD, hoặc public URL
 - Schema-first LLM extraction cho cả resume và job description
 - Skill normalization + alias matching (`normalize_skill` / `skill_aliases_for`)
-- Embedding-based semantic evidence retrieval (pgvector, 384-dim)
+- Deterministic evidence generation with pgvector-ready schema for future semantic retrieval
 - Deterministic explainable scoring engine (weighted: skills 0.5 / req 0.3 / exp 0.1 / lang 0.1)
+- Supported language matching: English, Vietnamese, Chinese, Japanese
 - Truth-guard classification cho resume rewrite suggestions (safe / needs_review / unsupported)
 - One-shot analyze workflow: ingest → parse → match → optimize
+- Shareable report detail page with copy-link and markdown export
+- Product-demo packaging: case study docs, CV summary, and demo-ready README
 - AI run observability (model, prompt version, latency, cost, validation status)
 
 ### Backend API
@@ -78,8 +81,8 @@ suggestions.
 ### Local AI (default)
 - Local regex/heuristic parsers (resume + job) — chạy offline, deterministic
 - Local resume optimizer + truth guard (rule-based)
-- Local embeddings qua `sentence-transformers/all-MiniLM-L6-v2` (384-dim)
-- Production có thể swap sang OpenAI / Gemini / Anthropic thông qua env vars
+- Local embeddings config/schema reserved for future semantic retrieval (`pgvector`, 384-dim)
+- Production parser/optimizer providers can be wired behind the existing env/provider abstractions
 
 ## 4. Out of Scope (Chưa build) / Tính năng ngoài phạm vi
 
@@ -102,7 +105,9 @@ suggestions.
 | M5 — Evaluation harness | ✅ Done | Runner, datasets, metrics, markdown report |
 | M6 — AI observability + diagnostics | ✅ Done | AIRun/AIOutput/EvalRun/EvalResult |
 | Ingestion upgrade | ✅ Done | Resume/JD upload, JD URL fetch, one-shot analyze API |
-| M7 — Frontend product polish | ◐ Partial | `/analyze` live workflow wired; full dashboard polish pending |
+| M7 — Frontend product polish | ✅ Done | `/analyze` workbench + `/reports/{id}` share/export report UX |
+| M8 — Product demo package | ✅ Done | Demo stability scripts, product README, case study, CV summary |
+| Language support | ✅ Done | English, Vietnamese, Chinese, Japanese detection for resume/JD matching |
 
 > Xem chi tiết pipeline và stack trong [Technical Architecture](technical_architecture.md).
 

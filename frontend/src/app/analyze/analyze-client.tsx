@@ -2,70 +2,39 @@
 
 import { type CSSProperties, type FormEvent, useMemo, useState } from "react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+import { API_BASE_URL, errorFromResponse } from "@/lib/jobfit-api";
+import type { AnalyzeResponse, MatchReport } from "@/lib/jobfit-types";
 
 type JobInputType = "text" | "url" | "file";
 type Phase = "idle" | "uploading" | "analyzing" | "done" | "error";
+type CopyState = "idle" | "copied" | "manual";
 
-type MatchEvidence = {
-  id: string;
-  job_requirement_text: string;
-  resume_evidence_text: string | null;
-  match_type: string;
-  match_status: string;
-  confidence: number | null;
-  explanation: string | null;
-};
+const DEMO_RESUME_TEXT = `
+Senior Backend Engineer with 5 years of experience building Python, FastAPI, PostgreSQL, and Docker-based platforms for AI and data products.
 
-type MatchReport = {
-  id: string;
-  overall_score: number;
-  analysis_confidence: number | null;
-  breakdown_json: Record<string, unknown>;
-  strengths_json: string[] | null;
-  gaps_json: string[] | null;
-  recommendations_json: string[] | null;
-  ats_report_json: Record<string, unknown> | null;
-  evidence: MatchEvidence[];
-};
+Experience highlights:
+- Designed FastAPI services for model inference workflows, reducing manual analyst handoffs by 40%.
+- Built PostgreSQL-backed internal tooling with audit logs, background validation jobs, and CI checks.
+- Partnered with data science teams to deploy ML prototypes into reliable production APIs.
+- Improved observability with structured logs, health checks, and latency dashboards for critical services.
 
-type RewriteSuggestion = {
-  id: string;
-  section_type: string;
-  original_text: string | null;
-  suggested_text: string;
-  reason: string | null;
-  estimated_score_lift: number | null;
-  truth_status: string;
-  guardrail_reason: string | null;
-};
+Core skills: Python, FastAPI, PostgreSQL, Docker, REST APIs, CI/CD, observability, data collaboration, ML platform tooling.
+Languages: English, Vietnamese, Chinese, Japanese.
+`.trim();
+const DEMO_JOB_TEXT = `
+We are hiring an ML Platform Engineer to build reliable product-facing AI infrastructure. The role requires strong Python and FastAPI experience, PostgreSQL-backed service design, Docker-based development workflows, API observability, and collaboration with data scientists and product teams across English, Vietnamese, Chinese, and Japanese-speaking markets.
 
-type Optimization = {
-  id: string;
-  score_before: number | null;
-  score_after: number | null;
-  status: string;
-  suggestions: RewriteSuggestion[];
-};
+Responsibilities:
+- Build and maintain APIs that serve machine learning workflows.
+- Improve reliability, logging, metrics, and deployment quality across AI services.
+- Partner with data teams to turn prototypes into production-ready systems.
+- Communicate trade-offs clearly and document technical decisions.
 
-type AnalyzeResponse = {
-  resume: {
-    id: string;
-    title: string;
-    source_type: string;
-    raw_text: string;
-    parse_confidence: number | null;
-  };
-  job: {
-    id: string;
-    title: string | null;
-    company: string | null;
-    source_url: string | null;
-    parse_confidence: number | null;
-  };
-  match_report: MatchReport;
-  optimization: Optimization;
-};
+Preferred skills: Python, FastAPI, PostgreSQL, Docker, REST APIs, observability, CI/CD, ML platform experience, English, Vietnamese, Chinese, and Japanese communication.
+`.trim();
+const DEMO_RESUME_TITLE = "Senior Backend / ML Platform Resume";
+const DEMO_JOB_TITLE = "ML Platform Engineer";
+const DEMO_COMPANY = "Acme AI";
 
 const inputModes: Array<{ id: JobInputType; label: string; copy: string }> = [
   { id: "text", label: "Paste JD", copy: "Best for protected boards" },
@@ -84,21 +53,18 @@ const progressSteps = [
 export default function AnalyzePage() {
   const sessionId = useMemo(() => `ui-${Date.now()}-${Math.random().toString(16).slice(2)}`, []);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeText, setResumeText] = useState(
-    "Senior backend engineer with Python, FastAPI, PostgreSQL, Docker, and ML inference API experience. Built internal tooling for model-serving workflows and collaborated with data teams on deployment reliability.",
-  );
-  const [resumeTitle, setResumeTitle] = useState("Senior Backend Resume");
+  const [resumeText, setResumeText] = useState(DEMO_RESUME_TEXT);
+  const [resumeTitle, setResumeTitle] = useState(DEMO_RESUME_TITLE);
   const [jobInputType, setJobInputType] = useState<JobInputType>("text");
   const [jobFile, setJobFile] = useState<File | null>(null);
-  const [jobText, setJobText] = useState(
-    "We are hiring an ML Platform Engineer to build Python and FastAPI services, improve PostgreSQL-backed platform tooling, strengthen observability, and partner across data and product teams.",
-  );
+  const [jobText, setJobText] = useState(DEMO_JOB_TEXT);
   const [jobUrl, setJobUrl] = useState("");
-  const [jobTitle, setJobTitle] = useState("ML Platform Engineer");
-  const [company, setCompany] = useState("Acme AI");
+  const [jobTitle, setJobTitle] = useState(DEMO_JOB_TITLE);
+  const [company, setCompany] = useState(DEMO_COMPANY);
   const [phase, setPhase] = useState<Phase>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
+  const [copyState, setCopyState] = useState<CopyState>("idle");
 
   const resumeReady = resumeFile !== null || resumeText.trim().length >= 20;
   const jobReady =
@@ -117,6 +83,7 @@ export default function AnalyzePage() {
     }
 
     setErrorMessage(null);
+    setCopyState("idle");
     setPhase("uploading");
 
     const formData = new FormData();
@@ -164,6 +131,40 @@ export default function AnalyzePage() {
     }
   }
 
+  function handleLoadDemo() {
+    setResumeFile(null);
+    setResumeText(DEMO_RESUME_TEXT);
+    setResumeTitle(DEMO_RESUME_TITLE);
+    setJobInputType("text");
+    setJobFile(null);
+    setJobText(DEMO_JOB_TEXT);
+    setJobUrl("");
+    setJobTitle(DEMO_JOB_TITLE);
+    setCompany(DEMO_COMPANY);
+    setErrorMessage(null);
+    setResult(null);
+    setCopyState("idle");
+    setPhase("idle");
+  }
+
+  function handleRunAnother() {
+    setResult(null);
+    setErrorMessage(null);
+    setCopyState("idle");
+    setPhase("idle");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handleCopyReportLink(reportId: string) {
+    const url = buildReportUrl(reportId);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyState("copied");
+    } catch {
+      setCopyState("manual");
+    }
+  }
+
   return (
     <main className="page-shell analyze-shell">
       <nav className="topbar" aria-label="Analyze navigation">
@@ -188,11 +189,11 @@ export default function AnalyzePage() {
 
       <section className="page-intro workbench-hero" aria-labelledby="analyze-title">
         <div>
-          <p className="eyebrow">Live AI workbench</p>
-          <h1 id="analyze-title">Add a resume and JD. Let the pipeline build the report.</h1>
+          <p className="eyebrow">No-account product demo</p>
+          <h1 id="analyze-title">Try the full CV/JD analysis flow in under a minute.</h1>
           <p className="supporting-copy">
-            Use files, pasted text, or a public job link. The backend extracts content, parses both
-            documents, scores the match, and returns truth-guarded rewrite suggestions.
+            Start with the built-in sample or replace it with your own files. JobFit AI extracts the
+            source material, scores the fit with evidence, then creates truth-guarded resume rewrites.
           </p>
         </div>
         <div className="hero-badges" aria-label="Supported analyze inputs">
@@ -200,6 +201,7 @@ export default function AnalyzePage() {
           <span className="utility-chip">DOCX</span>
           <span className="utility-chip">TXT</span>
           <span className="utility-chip">URL</span>
+          <span className="utility-chip">EN · VI · 中文 · 日本語</span>
         </div>
       </section>
 
@@ -210,7 +212,7 @@ export default function AnalyzePage() {
               <p className="eyebrow">Inputs</p>
               <h2>Source material</h2>
             </div>
-            <p>Keep the demo copy for a fast smoke test, or replace it with real files.</p>
+            <p>Use the sample to validate the product instantly. No login, setup wizard, or account history required.</p>
           </div>
 
           <div className="form-stack">
@@ -342,14 +344,24 @@ export default function AnalyzePage() {
               <strong>One-click AI pipeline</strong>
               <span>extract → parse → match → optimize → guard</span>
             </div>
-            <button
-              className="primary-button analyze-submit-button"
-              id="analyze-with-ai-button"
-              type="submit"
-              disabled={!canSubmit}
-            >
-              {isBusy ? "AI is analyzing..." : "Analyze with AI"}
-            </button>
+            <div className="form-action-group">
+              <button
+                className="ghost-button demo-reset-button"
+                id="load-demo-sample-button"
+                type="button"
+                onClick={handleLoadDemo}
+              >
+                Try demo data
+              </button>
+              <button
+                className="primary-button analyze-submit-button"
+                id="analyze-with-ai-button"
+                type="submit"
+                disabled={!canSubmit}
+              >
+                {isBusy ? "AI is analyzing..." : "Analyze with AI"}
+              </button>
+            </div>
           </div>
         </form>
 
@@ -371,7 +383,16 @@ export default function AnalyzePage() {
             ))}
           </div>
 
-          {result ? <GeneratedReport result={result} /> : <EmptyReportPreview />}
+          {result ? (
+            <GeneratedReport
+              copyState={copyState}
+              result={result}
+              onCopyReport={handleCopyReportLink}
+              onRunAnother={handleRunAnother}
+            />
+          ) : (
+            <EmptyReportPreview />
+          )}
         </article>
       </section>
     </main>
@@ -385,23 +406,34 @@ function EmptyReportPreview() {
         <span className="score-value">AI</span>
       </div>
       <div>
-        <span className="mini-tag">Waiting for input</span>
+        <span className="mini-tag">No-account demo ready</span>
         <h2>Report preview will appear here</h2>
         <p className="supporting-copy">
-          Submit the form to receive score breakdowns, evidence rows, strengths, gaps, and guarded
-          resume rewrite suggestions from the backend.
+          Use the pre-filled sample and click Analyze with AI to generate a shareable report. Replace
+          the text or upload real files when you want to test your own target role.
         </p>
       </div>
     </div>
   );
 }
 
-function GeneratedReport({ result }: { result: AnalyzeResponse }) {
+function GeneratedReport({
+  result,
+  copyState,
+  onCopyReport,
+  onRunAnother,
+}: {
+  result: AnalyzeResponse;
+  copyState: CopyState;
+  onCopyReport: (reportId: string) => void;
+  onRunAnother: () => void;
+}) {
   const rows = buildBreakdownRows(result.match_report);
   const suggestions = result.optimization.suggestions.slice(0, 5);
   const evidenceRows = result.match_report.evidence.slice(0, 4);
   const projectedBefore = result.optimization.score_before ?? result.match_report.overall_score;
   const projectedAfter = result.optimization.score_after ?? result.match_report.overall_score;
+  const reportPath = `/reports/${result.match_report.id}`;
 
   return (
     <div className="generated-report">
@@ -424,6 +456,23 @@ function GeneratedReport({ result }: { result: AnalyzeResponse }) {
           </p>
         </div>
       </section>
+
+      <div className="report-action-strip analyze-report-actions" aria-label="Generated report actions">
+        <a className="primary-button" href={reportPath} id="view-full-report-link">
+          View full report
+        </a>
+        <button
+          className="secondary-button"
+          id="copy-generated-report-link-button"
+          type="button"
+          onClick={() => onCopyReport(result.match_report.id)}
+        >
+          {copyState === "copied" ? "Link copied" : copyState === "manual" ? "Open report to copy" : "Copy link"}
+        </button>
+        <button className="ghost-button" id="run-another-analysis-button" type="button" onClick={onRunAnother}>
+          Run another
+        </button>
+      </div>
 
       <div className="score-breakdown compact-breakdown">
         {rows.map((item) => (
@@ -583,13 +632,9 @@ function humanize(value: string): string {
   return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-async function errorFromResponse(response: Response): Promise<string> {
-  try {
-    const payload = (await response.json()) as { detail?: unknown };
-    if (typeof payload.detail === "string") return payload.detail;
-    if (Array.isArray(payload.detail)) return payload.detail.map((item) => JSON.stringify(item)).join("; ");
-  } catch {
-    // Fall through to text response.
+function buildReportUrl(reportId: string): string {
+  if (typeof window === "undefined") {
+    return `/reports/${reportId}`;
   }
-  return (await response.text()) || `Request failed with status ${response.status}`;
+  return `${window.location.origin}/reports/${reportId}`;
 }

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from app.ai.languages import canonicalize_supported_languages, detect_supported_languages
 from app.ai.matching.normalization import (
     extract_keywords,
     normalize_skill,
@@ -125,8 +126,10 @@ class DeterministicMatchEngine:
         evidence.extend(requirement_records)
 
         required_languages = self._extract_language_requirements(job)
+        resume_languages = canonicalize_supported_languages(resume.languages)
+        required_language_keys = {language.casefold() for language in required_languages}
         language_overlap = sorted(
-            set(language.lower() for language in resume.languages) & set(required_languages)
+            language for language in resume_languages if language.casefold() in required_language_keys
         )
         language_score = 1.0 if not required_languages else min(
             1.0,
@@ -319,9 +322,18 @@ class DeterministicMatchEngine:
         return min(1.0, max(0.0, ratio))
 
     def _extract_language_requirements(self, job: JobExtraction) -> list[str]:
-        combined = " ".join([job.summary or "", *job.responsibilities, *job.required_skills])
-        languages = ["english", "vietnamese", "japanese", "french", "german"]
-        return [language for language in languages if language in combined.lower()]
+        requirement_texts = [item.requirement for item in job.requirements]
+        combined = " ".join(
+            [
+                job.title or "",
+                job.summary or "",
+                *job.responsibilities,
+                *job.required_skills,
+                *job.preferred_skills,
+                *requirement_texts,
+            ]
+        )
+        return detect_supported_languages(combined)
 
     def _infer_match_type(self, skill: str, matched_text: str) -> str:
         return MatchType.EXACT.value if matched_text == skill else MatchType.HYBRID.value

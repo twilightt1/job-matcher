@@ -1,6 +1,6 @@
 # JobFit AI — Technical Architecture
 
-> **Phiên bản:** 0.2.0  
+> **Phiên bản:** 0.3.0  
 > **Cập nhật:** 2026-06-14  
 > **Phạm vi:** tài liệu mô tả kiến trúc hiện tại trong repository `job-matcher`.
 > Nội dung ưu tiên phản ánh code đang có, không mô tả tính năng chưa được nối vào
@@ -70,9 +70,11 @@ job-matcher/
 │   ├── src/app/
 │   │   ├── analyze/                # Live upload/link analyze workflow
 │   │   ├── diagnostics/            # Diagnostics UI
+│   │   ├── reports/[id]/           # Shareable report detail route
 │   │   ├── globals.css             # Design system + page styling
 │   │   ├── layout.tsx
 │   │   └── page.tsx
+│   ├── src/lib/                    # Shared JobFit API helpers and response types
 │   ├── package.json
 │   └── tsconfig.json
 ├── docs/
@@ -96,12 +98,15 @@ job-matcher/
 | Framework | Next.js 14 App Router |
 | Runtime | React 18 client/server components |
 | Main workflow | `/analyze` page |
+| Shareable output | `/reports/[id]` report detail page |
+| Shared client layer | `src/lib/jobfit-api.ts`, `src/lib/jobfit-types.ts` |
 | API base | `NEXT_PUBLIC_API_BASE_URL`, default `http://localhost:8000` |
 | Styling | Vanilla CSS in `src/app/globals.css` |
-| Output | Inline match report and optimization results |
+| Output | Inline match preview plus shareable match report and markdown export |
 
-The `/analyze` client sends `multipart/form-data` to `POST /api/analyze` and
-renders the returned `AnalyzeRead` payload.
+The `/analyze` client sends `multipart/form-data` to `POST /api/analyze`, renders
+an inline preview from the returned `AnalyzeRead` payload, and links to the
+shareable `/reports/[id]` route for the persisted report.
 
 ### 3.2 Backend API
 
@@ -520,6 +525,20 @@ overall_score = round(weighted_sum * 100)
   "warnings": []
 }
 ```
+
+Supported language detection is centralized in `backend/app/ai/languages.py` and currently
+covers these canonical labels:
+
+| Canonical label | Example aliases |
+| --- | --- |
+| English | `english`, `tiếng anh`, `英語`, `英语` |
+| Vietnamese | `vietnamese`, `tiếng việt`, `ベトナム語`, `越南语` |
+| Chinese | `chinese`, `mandarin`, `tiếng trung`, `中国語`, `中文` |
+| Japanese | `japanese`, `tiếng nhật`, `nihongo`, `日本語` |
+
+The local resume parser uses the same helper to extract candidate languages, and
+the match engine uses it to detect language requirements from job summary,
+responsibilities, skills, and requirement text.
 
 ## 12. Truth Guard
 
