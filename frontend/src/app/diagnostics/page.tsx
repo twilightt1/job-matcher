@@ -1,58 +1,63 @@
 const diagnosticsCards = [
   {
-    tag: "Prompt versioning",
-    title: "Track prompt and schema lineage",
-    copy: "Every AI step captures prompt names, versions, schema revisions, and validation state for review.",
+    tag: "Prompt lineage",
+    title: "Versioned prompts and schemas",
+    copy: "Each AI-adjacent step records prompt names, prompt versions, schema versions, and validation state.",
   },
   {
-    tag: "AIRun telemetry",
-    title: "Latency and token visibility are built in",
-    copy: "The backend persists latency, token counts, providers, model names, and status transitions for each run.",
+    tag: "AIRun trail",
+    title: "Runs are inspectable",
+    copy: "Parse, optimize, and truth-guard operations persist status, provider, model, timing, and output metadata.",
   },
   {
     tag: "Truth guard",
-    title: "Unsupported resume claims are explicitly classified",
-    copy: "Optimization suggestions are labeled safe, needs review, or unsupported before being exposed to the UI.",
+    title: "Unsafe claims are flagged",
+    copy: "Rewrite suggestions are classified before display so unsupported resume claims do not slip through silently.",
   },
   {
-    tag: "Deterministic evidence",
-    title: "Scores can always be traced back to normalized signals",
-    copy: "The dashboard explains missing skills, requirement overlap, ATS keywords, and supporting evidence objects.",
+    tag: "Evidence rows",
+    title: "Scores point to real signals",
+    copy: "Match reports store requirement-level evidence, similarity signals, and explanation text for review.",
   },
   {
     tag: "Validation",
-    title: "Schema repair and validation are first-class metrics",
-    copy: "Malformed or suspicious model outputs are visible instead of being hidden behind opaque success states.",
+    title: "Structured outputs stay accountable",
+    copy: "AI outputs are stored with validation status, warnings, and repair-ready metadata hooks.",
   },
   {
-    tag: "Evaluation ready",
-    title: "The product is positioned for evals and offline benchmarks",
-    copy: "Telemetry and structured outputs make it straightforward to compare prompts, models, and scoring revisions later.",
+    tag: "Evals",
+    title: "Benchmarks are ready to expand",
+    copy: "The evaluation harness can compare parser, matching, and truth-guard behavior across datasets.",
   },
 ];
 
 const timeline = [
   {
     step: "01",
-    title: "Input normalization",
-    copy: "Resume and job text are converted into schema-validated JSON using traceable parse runs.",
+    title: "Parse inputs",
+    copy: "Resume and job text become schema-first JSON with parse confidence and warnings.",
   },
   {
     step: "02",
-    title: "Scoring pipeline",
-    copy: "Match reports store overall score, explanation JSON, ATS coverage, and evidence rows.",
+    title: "Create match report",
+    copy: "The scoring engine writes breakdown JSON, ATS coverage, gaps, and evidence rows.",
   },
   {
     step: "03",
-    title: "Optimization pipeline",
-    copy: "Grounded rewrite drafts and truth-guard decisions are persisted with their own AI observability trail.",
+    title: "Generate optimizer draft",
+    copy: "The optimizer proposes targeted resume changes based on the parsed job and match report.",
+  },
+  {
+    step: "04",
+    title: "Guard every suggestion",
+    copy: "Truth-guard runs classify each rewrite as safe, needs review, or unsupported.",
   },
 ];
 
 const telemetryPanels = [
   {
     title: "Latest session snapshot",
-    badge: "session telemetry",
+    badge: "runtime trace",
     items: [
       "resume_parse · success · local-resume-parser-v1",
       "job_parse · success · local-job-parser-v1",
@@ -61,53 +66,52 @@ const telemetryPanels = [
     ],
   },
   {
-    title: "Visibility recruiters can understand",
-    badge: "product narrative",
+    title: "What reviewers can verify",
+    badge: "portfolio signal",
     items: [
-      "Prompt version awareness",
-      "Validation status surfaced to UI",
-      "Evidence-backed explanation summaries",
-      "Blocked unsupported rewrites",
+      "Schema-first extraction contracts",
+      "Stored prompt and model metadata",
+      "Evidence-backed score decomposition",
+      "Explicit unsupported-claim detection",
     ],
   },
 ];
 
 export default function DiagnosticsPage() {
   return (
-    <main className="page-shell compact-shell">
+    <main className="page-shell compact-shell diagnostics-shell">
       <nav className="topbar" aria-label="Diagnostics navigation">
-        <div className="brand-group">
-          <div className="brand-badge" aria-hidden="true">
+        <a className="brand-group" href="/" id="diagnostics-home-brand">
+          <span className="brand-badge" aria-hidden="true">
             JF
-          </div>
-          <div className="brand-meta">
-            <p className="brand-title">JobFit AI</p>
-            <p className="brand-caption">AI observability and eval-readiness view</p>
-          </div>
-        </div>
+          </span>
+          <span className="brand-meta">
+            <span className="brand-title">JobFit AI</span>
+            <span className="brand-caption">Observability console</span>
+          </span>
+        </a>
         <div className="nav-links">
           <a className="nav-link" href="/" id="diagnostics-home-link">
             Overview
           </a>
           <a className="nav-link" href="/analyze" id="diagnostics-analyze-link">
-            Analyze Flow
+            Analyze
           </a>
         </div>
       </nav>
 
-      <section className="page-intro">
-        <p className="eyebrow">AI Diagnostics</p>
-        <h1>Model, prompt, validation, and truth-guard telemetry in one dashboard.</h1>
+      <section className="page-intro diagnostics-hero" aria-labelledby="diagnostics-title">
+        <p className="eyebrow">AI diagnostics</p>
+        <h1 id="diagnostics-title">A clean control room for prompts, schemas, and truth guard runs.</h1>
         <p className="supporting-copy">
-          This page turns backend observability into a premium portfolio surface: it showcases the
-          discipline behind schema validation, prompt tracking, latency visibility, and grounded AI
-          behavior instead of hiding those concerns behind a generic UX shell.
+          This console reframes backend telemetry as a product feature: visible model runs,
+          validation signals, evidence records, and safety decisions in a calm review surface.
         </p>
         <div className="quick-links">
-          <a className="ghost-button" href="/analyze" id="diagnostics-cta-analyze">
-            Review the product flow
+          <a className="primary-button" href="/analyze" id="diagnostics-cta-analyze">
+            Run the analyze flow
           </a>
-          <a className="ghost-button" href="/" id="diagnostics-cta-home">
+          <a className="secondary-button" href="/" id="diagnostics-cta-home">
             Back to overview
           </a>
         </div>
@@ -124,23 +128,25 @@ export default function DiagnosticsPage() {
       </section>
 
       <section className="telemetry-strip" aria-labelledby="telemetry-title">
-        <div>
-          <div className="section-heading">
+        <div className="telemetry-left">
+          <div className="section-heading compact-heading">
             <div>
               <p className="eyebrow">Execution trail</p>
-              <h2 id="telemetry-title">A clean story from parse runs to guarded resume rewrites</h2>
+              <h2 id="telemetry-title">From input parsing to guarded rewrite decisions.</h2>
             </div>
             <p>
-              The interface is designed to make AI pipeline reliability legible to both technical
-              reviewers and product-minded hiring managers.
+              The system is structured so each AI operation can be inspected, compared, and improved
+              without losing the product story.
             </p>
           </div>
           <div className="timeline-stack">
             {timeline.map((item) => (
               <article className="timeline-card" key={item.step}>
-                <span className="timeline-step">Step {item.step}</span>
-                <h3>{item.title}</h3>
-                <p>{item.copy}</p>
+                <span className="timeline-step">{item.step}</span>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.copy}</p>
+                </div>
               </article>
             ))}
           </div>

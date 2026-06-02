@@ -15,9 +15,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "JobFit AI — Explainable Resume Matching & Resume Optimizer",
+  title: "JobFit AI — AI Resume Matching Workspace",
   description:
-    "Portfolio-grade AI/ML product demo for structured resume parsing, explainable job matching, truth-guarded optimization, and AI diagnostics.",
+    "Upload a resume and job description to generate an explainable match report, evidence-backed gaps, and truth-guarded resume optimization suggestions.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

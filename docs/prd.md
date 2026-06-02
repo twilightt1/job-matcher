@@ -14,9 +14,10 @@ suggestions.
 
 - **Tên sản phẩm:** JobFit AI — AI Job Match & Resume Optimizer
 - **Loại sản phẩm:** Split-frontend/backend web app với REST API
-- **Phiên bản hiện tại:** 0.1.0 (Milestone 0–6 backend foundation)
-- **Mục tiêu:** Demonstrate kỹ năng AI engineering: schema-first extraction,
-  skill normalization, explainable scoring, truth guard, observability, evals.
+- **Phiên bản hiện tại:** 0.2.0 (Milestone 0–6 + ingestion/analyze upgrade)
+- **Mục tiêu:** Demonstrate kỹ năng AI engineering: document ingestion,
+  schema-first extraction, skill normalization, explainable scoring, truth guard,
+  observability, evals.
 
 ## 2. Target Users / Đối tượng người dùng
 
@@ -32,22 +33,29 @@ suggestions.
 Đây là các tính năng **đã chạy được trong repo hiện tại**:
 
 ### Core AI pipeline
+- Resume input: pasted text hoặc upload PDF/DOCX/TXT/MD
+- JD input: pasted text, upload PDF/DOCX/TXT/MD, hoặc public URL
 - Schema-first LLM extraction cho cả resume và job description
 - Skill normalization + alias matching (`normalize_skill` / `skill_aliases_for`)
 - Embedding-based semantic evidence retrieval (pgvector, 384-dim)
 - Deterministic explainable scoring engine (weighted: skills 0.5 / req 0.3 / exp 0.1 / lang 0.1)
 - Truth-guard classification cho resume rewrite suggestions (safe / needs_review / unsupported)
+- One-shot analyze workflow: ingest → parse → match → optimize
 - AI run observability (model, prompt version, latency, cost, validation status)
 
 ### Backend API
-- `POST /api/resumes` — create resume record
+- `POST /api/resumes` — create resume record from pasted text
+- `POST /api/resumes/upload` — upload resume PDF/DOCX/TXT/MD
 - `GET /api/resumes/{id}` — read resume + parsed JSON
 - `POST /api/resumes/{id}/parse` — chạy LLM extraction
 - `GET /api/resumes/{id}/parse-diagnostics` — list AI runs cho session
-- `POST /api/jobs` — create job record
+- `POST /api/jobs` — create job record from pasted text
+- `POST /api/jobs/upload` — upload JD PDF/DOCX/TXT/MD
+- `POST /api/jobs/from-url` — fetch/extract public JD HTML/text URL
 - `GET /api/jobs/{id}` — read job + parsed JSON
 - `POST /api/jobs/{id}/parse` — chạy job parser
 - `GET /api/jobs/{id}/parse-diagnostics` — diagnostics
+- `POST /api/analyze` — one-shot multipart ingest + parse + match + optimize
 - `POST /api/match-reports` — tạo match report (idempotent qua unique constraint)
 - `GET /api/match-reports/{id}` — read report + evidence rows
 - `POST /api/optimizations` — tạo optimized resume (chạy truth-guard từng suggestion)
@@ -78,10 +86,8 @@ suggestions.
 - **Authentication / user login** — `User` table tồn tại nhưng chưa có JWT/OAuth
 - **Cover letter generation** — schema reserved, chưa có prompt/UI
 - **Interview prep question generation** — đề cập trong roadmap, chưa build
-- **Job board scraping** — manual paste text qua API
-- **PDF / DOCX resume upload** — schema có `source_type` nhưng chỉ text path wired
-- **Next.js dashboard UI for production** — frontend skeleton có nhưng chưa
-  call hết match-report / optimization endpoints
+- **Job board scraping/crawling at scale** — chỉ fetch public JD URL đơn lẻ với SSRF guard
+- **OCR cho scanned PDF** — PDF text extraction có warning, chưa chạy OCR
 - **Multi-tenant billing** — `User.plan` column có nhưng chưa enforce
 
 ## 5. Build Status / Trạng thái build
@@ -95,7 +101,8 @@ suggestions.
 | M4 — Truth guard + optimization | ✅ Done | Truth-guard per suggestion, decision tracking |
 | M5 — Evaluation harness | ✅ Done | Runner, datasets, metrics, markdown report |
 | M6 — AI observability + diagnostics | ✅ Done | AIRun/AIOutput/EvalRun/EvalResult |
-| M7 — Frontend product polish | ⏭️ Skipped | Per user decision, focus chuyển sang backend upgrade |
+| Ingestion upgrade | ✅ Done | Resume/JD upload, JD URL fetch, one-shot analyze API |
+| M7 — Frontend product polish | ◐ Partial | `/analyze` live workflow wired; full dashboard polish pending |
 
 > Xem chi tiết pipeline và stack trong [Technical Architecture](technical_architecture.md).
 
