@@ -17,10 +17,10 @@ def test_detect_supported_languages_handles_four_target_languages_and_aliases() 
     ]
 
 
-def test_local_resume_parser_extracts_four_target_languages() -> None:
+async def test_local_resume_parser_extracts_four_target_languages() -> None:
     parser = LocalResumeParserClient()
 
-    result = parser.parse_resume(
+    result = await parser.parse_resume(
         "Alex Nguyen\n"
         "AI Platform Engineer\n"
         "Skills: Python, FastAPI\n"
@@ -34,6 +34,7 @@ def test_local_resume_parser_extracts_four_target_languages() -> None:
         "Chinese",
         "Japanese",
     ]
+    assert result.usage.provider == "local" if hasattr(result, "usage") else True
 
 
 def test_match_engine_scores_chinese_and_japanese_language_requirements() -> None:

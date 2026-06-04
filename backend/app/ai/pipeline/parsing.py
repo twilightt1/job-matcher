@@ -6,17 +6,11 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.ai.clients.local_job_parser import LocalJobParserClient
-from app.ai.clients.local_resume_parser import LocalResumeParserClient
+from app.ai.clients import get_job_parser_client, get_resume_parser_client
 from app.ai.prompt_loader import load_prompt_template
+from app.core.config import get_settings
 from app.db.models.ai_run import AIOutput, AIRun
-from app.db.models.enums import (
-    AIProvider,
-    AIRunStatus,
-    AITaskType,
-    ParseStatus,
-    ValidationStatus,
-)
+from app.db.models.enums import AIRunStatus, AITaskType, ParseStatus, ValidationStatus
 from app.db.models.job import Job
 from app.db.models.resume import Resume
 
@@ -27,7 +21,8 @@ SCHEMA_VERSION = "v1"
 
 
 async def parse_resume_record(session: AsyncSession, resume: Resume) -> Resume:
-    client = LocalResumeParserClient()
+    settings = get_settings()
+    client = get_resume_parser_client(settings)
     prompt_template = load_prompt_template(RESUME_PROMPT_NAME)
     prompt_text = prompt_template.replace("<<<RESUME_TEXT>>>", resume.raw_text)
     input_hash = hashlib.sha256(resume.raw_text.encode("utf-8")).hexdigest()
@@ -36,7 +31,7 @@ async def parse_resume_record(session: AsyncSession, resume: Resume) -> Resume:
         session_id=resume.session_id,
         task_type=AITaskType.RESUME_PARSE.value,
         status=AIRunStatus.RUNNING.value,
-        provider=AIProvider.LOCAL.value,
+        provider=settings.ai_provider,
         model_name=client.model_name,
         prompt_name=RESUME_PROMPT_NAME,
         prompt_version=PROMPT_VERSION,
@@ -57,24 +52,35 @@ async def parse_resume_record(session: AsyncSession, resume: Resume) -> Resume:
     await session.flush()
 
     try:
-        result = client.parse_resume(resume.raw_text)
+        result = await client.parse_resume(resume.raw_text)
         output_json = _model_dump(result.extraction)
-        ai_run.status = AIRunStatus.SUCCESS.value
-        ai_run.validation_status = ValidationStatus.VALID.value
+        ai_run.status = (
+            AIRunStatus.REPAIRED.value
+            if result.usage.repair_attempted
+            else AIRunStatus.SUCCESS.value
+        )
+        ai_run.validation_status = (
+            ValidationStatus.REPAIRED.value
+            if result.usage.repair_attempted
+            else ValidationStatus.VALID.value
+        )
         ai_run.completed_at = datetime.now(UTC)
-        ai_run.input_token_count = len(prompt_text.split())
-        ai_run.output_token_count = max(1, len(str(output_json).split()))
-        ai_run.total_token_count = ai_run.input_token_count + ai_run.output_token_count
-        ai_run.latency_ms = 1
+        ai_run.input_token_count = result.usage.input_token_count
+        ai_run.output_token_count = result.usage.output_token_count
+        ai_run.total_token_count = result.usage.total_token_count
+        ai_run.latency_ms = result.usage.latency_ms
 
         session.add(
             AIOutput(
                 ai_run=ai_run,
                 output_json=output_json,
-                validation_status=ValidationStatus.VALID.value,
+                validation_status=ai_run.validation_status,
                 validation_errors=None,
-                repair_attempted=False,
-                metadata_json={"warnings": result.warnings},
+                repair_attempted=result.usage.repair_attempted,
+                metadata_json={
+                    "warnings": result.warnings,
+                    **result.usage.metadata,
+                },
             )
         )
 
@@ -103,7 +109,8 @@ async def parse_resume_record(session: AsyncSession, resume: Resume) -> Resume:
 
 
 async def parse_job_record(session: AsyncSession, job: Job) -> Job:
-    client = LocalJobParserClient()
+    settings = get_settings()
+    client = get_job_parser_client(settings)
     prompt_template = load_prompt_template(JOB_PROMPT_NAME)
     prompt_text = prompt_template.replace("<<<JOB_DESCRIPTION>>>", job.description)
     input_hash = hashlib.sha256(job.description.encode("utf-8")).hexdigest()
@@ -112,7 +119,7 @@ async def parse_job_record(session: AsyncSession, job: Job) -> Job:
         session_id=job.session_id,
         task_type=AITaskType.JOB_PARSE.value,
         status=AIRunStatus.RUNNING.value,
-        provider=AIProvider.LOCAL.value,
+        provider=settings.ai_provider,
         model_name=client.model_name,
         prompt_name=JOB_PROMPT_NAME,
         prompt_version=PROMPT_VERSION,
@@ -133,24 +140,35 @@ async def parse_job_record(session: AsyncSession, job: Job) -> Job:
     await session.flush()
 
     try:
-        result = client.parse_job(job.description)
+        result = await client.parse_job(job.description)
         output_json = _model_dump(result.extraction)
-        ai_run.status = AIRunStatus.SUCCESS.value
-        ai_run.validation_status = ValidationStatus.VALID.value
+        ai_run.status = (
+            AIRunStatus.REPAIRED.value
+            if result.usage.repair_attempted
+            else AIRunStatus.SUCCESS.value
+        )
+        ai_run.validation_status = (
+            ValidationStatus.REPAIRED.value
+            if result.usage.repair_attempted
+            else ValidationStatus.VALID.value
+        )
         ai_run.completed_at = datetime.now(UTC)
-        ai_run.input_token_count = len(prompt_text.split())
-        ai_run.output_token_count = max(1, len(str(output_json).split()))
-        ai_run.total_token_count = ai_run.input_token_count + ai_run.output_token_count
-        ai_run.latency_ms = 1
+        ai_run.input_token_count = result.usage.input_token_count
+        ai_run.output_token_count = result.usage.output_token_count
+        ai_run.total_token_count = result.usage.total_token_count
+        ai_run.latency_ms = result.usage.latency_ms
 
         session.add(
             AIOutput(
                 ai_run=ai_run,
                 output_json=output_json,
-                validation_status=ValidationStatus.VALID.value,
+                validation_status=ai_run.validation_status,
                 validation_errors=None,
-                repair_attempted=False,
-                metadata_json={"warnings": result.warnings},
+                repair_attempted=result.usage.repair_attempted,
+                metadata_json={
+                    "warnings": result.warnings,
+                    **result.usage.metadata,
+                },
             )
         )
 

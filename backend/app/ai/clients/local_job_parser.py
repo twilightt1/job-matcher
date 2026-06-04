@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import re
 
-from app.ai.clients.base import JobParserClient, ParsedJobResult
+from app.ai.clients.base import JobParserClient, LLMUsage, ParsedJobResult
 from app.ai.schemas import JobExtraction, JobRequirementItem
 
 
 class LocalJobParserClient(JobParserClient):
-    """Heuristic parser used for MVP development before remote LLM integration."""
+    """Heuristic parser used as the offline fallback before remote LLM integration."""
 
     model_name = "local-rule-parser-v1"
 
-    def parse_job(self, description: str) -> ParsedJobResult:
+    async def parse_job(self, description: str) -> ParsedJobResult:
         lines = [line.strip() for line in description.splitlines() if line.strip()]
         lower_text = description.lower()
 
@@ -56,6 +56,7 @@ class LocalJobParserClient(JobParserClient):
             confidence=round(confidence, 2),
             warnings=warnings,
             model_name=self.model_name,
+            usage=LLMUsage(provider="local", model_name=self.model_name, latency_ms=0),
         )
 
     def _extract_company(self, lines: list[str]) -> str | None:

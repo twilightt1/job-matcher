@@ -7,14 +7,15 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.ai.clients.local_resume_optimizer import LocalResumeOptimizer
-from app.ai.guardrails.truth_guard import LocalTruthGuard
+from app.ai.clients import get_resume_optimizer_client, get_truth_guard_client
+from app.ai.clients.base import LLMUsage, TruthGuardClient
 from app.ai.prompt_loader import load_prompt_template
 from app.ai.schemas import JobExtraction, ResumeExtraction
 from app.ai.schemas.optimization import OptimizedResumeDraft, RewriteSuggestionDraft
 from app.ai.schemas.truth_guard import TruthGuardDecision
+from app.core.config import get_settings
 from app.db.models.ai_run import AIOutput, AIRun
-from app.db.models.enums import AIProvider, AIRunStatus, AITaskType, ValidationStatus
+from app.db.models.enums import AIRunStatus, AITaskType, ValidationStatus
 from app.db.models.job import Job
 from app.db.models.match_report import MatchReport
 from app.db.models.optimization import OptimizedResume, RewriteSuggestion
@@ -43,11 +44,13 @@ async def optimize_resume_for_match(
     job_extraction = JobExtraction.model_validate(job.parsed_json or {})
     match_report_json = _match_report_to_json(match_report)
 
-    optimizer = LocalResumeOptimizer()
+    settings = get_settings()
+    optimizer = get_resume_optimizer_client(settings)
     optimizer_prompt = _build_optimizer_prompt(resume_extraction, job_extraction, match_report_json)
     optimizer_run = _create_ai_run(
         session_id=resume.session_id or job.session_id,
         task_type=AITaskType.RESUME_OPTIMIZE.value,
+        provider=settings.ai_provider,
         model_name=optimizer.model_name,
         prompt_name=OPTIMIZER_PROMPT_NAME,
         input_text=optimizer_prompt,
@@ -61,21 +64,29 @@ async def optimize_resume_for_match(
     await session.flush()
 
     try:
-        draft = optimizer.optimize(resume_extraction, job_extraction, match_report_json)
+        optimize_result = await optimizer.optimize(
+            resume_extraction,
+            job_extraction,
+            match_report_json,
+        )
+        draft = optimize_result.draft
         draft_json = _model_dump(draft)
-        _complete_ai_run(optimizer_run, optimizer_prompt, draft_json)
+        _complete_ai_run(optimizer_run, optimize_result.usage, draft_json)
         session.add(
             AIOutput(
                 ai_run=optimizer_run,
                 output_json=draft_json,
-                validation_status=ValidationStatus.VALID.value,
+                validation_status=optimizer_run.validation_status,
                 validation_errors=None,
-                repair_attempted=False,
-                metadata_json={"suggestion_count": len(draft.suggestions)},
+                repair_attempted=optimize_result.usage.repair_attempted,
+                metadata_json={
+                    "suggestion_count": len(draft.suggestions),
+                    **optimize_result.usage.metadata,
+                },
             )
         )
 
-        truth_guard = LocalTruthGuard()
+        truth_guard = get_truth_guard_client(settings)
         guarded_suggestions = await _guard_suggestions(
             session,
             truth_guard,
@@ -115,7 +126,7 @@ async def optimize_resume_for_match(
 
 async def _guard_suggestions(
     session: AsyncSession,
-    truth_guard: LocalTruthGuard,
+    truth_guard: TruthGuardClient,
     suggestions: list[RewriteSuggestionDraft],
     resume_extraction: ResumeExtraction,
     resume: Resume,
@@ -128,6 +139,7 @@ async def _guard_suggestions(
         guard_run = _create_ai_run(
             session_id=resume.session_id or job.session_id,
             task_type=AITaskType.TRUTH_GUARD.value,
+            provider=get_settings().ai_provider,
             model_name=truth_guard.model_name,
             prompt_name=TRUTH_GUARD_PROMPT_NAME,
             input_text=guard_prompt,
@@ -141,17 +153,21 @@ async def _guard_suggestions(
         session.add(guard_run)
         await session.flush()
 
-        decision = truth_guard.evaluate(suggestion, resume_extraction)
+        guard_result = await truth_guard.evaluate(suggestion, resume_extraction)
+        decision = guard_result.decision
         output_json = _model_dump(decision)
-        _complete_ai_run(guard_run, guard_prompt, output_json)
+        _complete_ai_run(guard_run, guard_result.usage, output_json)
         session.add(
             AIOutput(
                 ai_run=guard_run,
                 output_json=output_json,
-                validation_status=ValidationStatus.VALID.value,
+                validation_status=guard_run.validation_status,
                 validation_errors=None,
-                repair_attempted=False,
-                metadata_json={"section_type": suggestion.section_type},
+                repair_attempted=guard_result.usage.repair_attempted,
+                metadata_json={
+                    "section_type": suggestion.section_type,
+                    **guard_result.usage.metadata,
+                },
             )
         )
         guarded.append(
@@ -257,6 +273,7 @@ def _create_ai_run(
     *,
     session_id: str | None,
     task_type: str,
+    provider: str,
     model_name: str,
     prompt_name: str,
     input_text: str,
@@ -266,7 +283,7 @@ def _create_ai_run(
         session_id=session_id,
         task_type=task_type,
         status=AIRunStatus.RUNNING.value,
-        provider=AIProvider.LOCAL.value,
+        provider=provider,
         model_name=model_name,
         prompt_name=prompt_name,
         prompt_version=PROMPT_VERSION,
@@ -279,14 +296,24 @@ def _create_ai_run(
     )
 
 
-def _complete_ai_run(ai_run: AIRun, input_text: str, output_json: dict[str, Any]) -> None:
-    ai_run.status = AIRunStatus.SUCCESS.value
-    ai_run.validation_status = ValidationStatus.VALID.value
+def _complete_ai_run(ai_run: AIRun, usage: LLMUsage, output_json: dict[str, Any]) -> None:
+    ai_run.status = (
+        AIRunStatus.REPAIRED.value
+        if usage.repair_attempted
+        else AIRunStatus.SUCCESS.value
+    )
+    ai_run.validation_status = (
+        ValidationStatus.REPAIRED.value if usage.repair_attempted else ValidationStatus.VALID.value
+    )
     ai_run.completed_at = datetime.now(UTC)
-    ai_run.input_token_count = len(input_text.split())
-    ai_run.output_token_count = max(1, len(str(output_json).split()))
-    ai_run.total_token_count = ai_run.input_token_count + ai_run.output_token_count
-    ai_run.latency_ms = 1
+    ai_run.input_token_count = usage.input_token_count
+    ai_run.output_token_count = usage.output_token_count
+    ai_run.total_token_count = usage.total_token_count
+    ai_run.latency_ms = usage.latency_ms
+    if usage.provider:
+        ai_run.provider = usage.provider
+    if usage.model_name:
+        ai_run.model_name = usage.model_name
 
 
 def _match_report_to_json(match_report: MatchReport) -> dict[str, Any]:

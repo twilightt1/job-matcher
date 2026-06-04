@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.ai.clients.base import LLMUsage, OptimizeResult, ResumeOptimizerClient
 from app.ai.matching.normalization import extract_keywords, normalize_skill, normalize_skill_list
 from app.ai.schemas import JobExtraction, ResumeExtraction
 from app.ai.schemas.optimization import OptimizedResumeDraft, RewriteSuggestionDraft
@@ -7,17 +8,17 @@ from app.ai.schemas.optimization import OptimizedResumeDraft, RewriteSuggestionD
 MAX_SUGGESTIONS = 5
 
 
-class LocalResumeOptimizer:
-    """Grounded local optimizer used for the MVP before provider-backed LLM calls."""
+class LocalResumeOptimizer(ResumeOptimizerClient):
+    """Grounded local optimizer used as the offline fallback before provider-backed calls."""
 
     model_name = "local-resume-optimizer-v1"
 
-    def optimize(
+    async def optimize(
         self,
         resume: ResumeExtraction,
         job: JobExtraction,
         match_report: dict[str, object],
-    ) -> OptimizedResumeDraft:
+    ) -> OptimizeResult:
         missing_skills = _missing_skills(match_report)
         normalized_resume_skills = normalize_skill_list(resume.skills)
         suggestions: list[RewriteSuggestionDraft] = []
@@ -43,13 +44,17 @@ class LocalResumeOptimizer:
         optimized_skills = _merge_skills(normalized_resume_skills, suggestions)
         projected_score = _projected_score(match_report, suggestions)
 
-        return OptimizedResumeDraft(
+        draft = OptimizedResumeDraft(
             version_name="Targeted resume draft",
             summary=self._optimized_summary(resume, job, missing_skills),
             skills=optimized_skills,
             experience_highlights=list(resume.experience_highlights),
             suggestions=suggestions,
             projected_score=projected_score,
+        )
+        return OptimizeResult(
+            draft=draft,
+            usage=LLMUsage(provider="local", model_name=self.model_name, latency_ms=0),
         )
 
     def _summary_suggestion(

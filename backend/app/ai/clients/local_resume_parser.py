@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import re
 
-from app.ai.clients.base import ParsedResumeResult, ResumeParserClient
+from app.ai.clients.base import LLMUsage, ParsedResumeResult, ResumeParserClient
 from app.ai.languages import detect_supported_languages
 from app.ai.schemas import ResumeContact, ResumeEducationItem, ResumeExtraction
 
 
 class LocalResumeParserClient(ResumeParserClient):
-    """Heuristic parser used for MVP development before remote LLM integration."""
+    """Heuristic parser used as the offline fallback before remote LLM integration."""
 
     model_name = "local-rule-parser-v1"
+    usage = LLMUsage(provider="local", model_name=model_name)
 
-    def parse_resume(self, raw_text: str) -> ParsedResumeResult:
+    async def parse_resume(self, raw_text: str) -> ParsedResumeResult:
         lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
         lower_text = raw_text.lower()
 
@@ -54,6 +55,7 @@ class LocalResumeParserClient(ResumeParserClient):
             confidence=round(confidence, 2),
             warnings=warnings,
             model_name=self.model_name,
+            usage=LLMUsage(provider="local", model_name=self.model_name, latency_ms=0),
         )
 
     def _extract_summary(self, lines: list[str]) -> str | None:

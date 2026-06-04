@@ -23,10 +23,24 @@ class Settings(BaseSettings):
         alias="BACKEND_CORS_ORIGINS",
     )
 
-    ai_provider: str = Field(default="gemini", alias="AI_PROVIDER")
+    # AI / LLM providers. Default to "local" so the repo runs with no API key.
+    # "openai" enables the OpenAI-compatible client (works with OpenAI, Gemini's
+    # OpenAI-compat endpoint, Ollama, vLLM, OpenRouter, LM Studio, etc.).
+    ai_provider: str = Field(default="local", alias="AI_PROVIDER")
     gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
+
+    # OpenAI-compatible Chat Completions endpoint. Point at any compatible base URL.
+    # Examples:
+    #   OpenAI:        https://api.openai.com/v1
+    #   Gemini compat: https://generativelanguage.googleapis.com/v1beta/openai
+    #   Ollama local:  http://localhost:11434/v1
+    openai_base_url: str = Field(default="https://api.openai.com/v1", alias="OPENAI_BASE_URL")
+    llm_model: str = Field(default="gpt-4o-mini", alias="LLM_MODEL")
+    llm_temperature: float = Field(default=0.0, alias="LLM_TEMPERATURE")
+    llm_request_timeout_seconds: float = Field(default=30.0, alias="LLM_REQUEST_TIMEOUT_SECONDS")
+    llm_max_repair_attempts: int = Field(default=2, alias="LLM_MAX_REPAIR_ATTEMPTS")
 
     embedding_provider: str = Field(default="local", alias="EMBEDDING_PROVIDER")
     embedding_model: str = Field(
