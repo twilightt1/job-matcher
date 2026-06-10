@@ -1,0 +1,51 @@
+{
+  "resumeId": "pm_ai_en",
+  "jobId": "ai_product_manager",
+  "resumeParser": {
+    "expectedCandidateName": "AI Product Manager",
+    "expectedSkills": [
+      "product strategy",
+      "ai evaluation",
+      "analytics",
+      "stakeholder management"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 6
+  },
+  "jobParser": {
+    "expectedTitle": "AI Product Manager",
+    "expectedCompany": "ModelOps Co",
+    "expectedRequiredSkills": [
+      "product strategy",
+      "ai evaluation",
+      "analytics"
+    ],
+    "expectedPreferredSkills": [
+      "llm",
+      "stakeholder management"
+    ],
+    "expectedSeniority": "senior"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "product strategy",
+      "ai evaluation",
+      "analytics",
+      "stakeholder management"
+    ],
+    "expectedMissingSkills": [
+      "llm"
+    ],
+    "expectedScoreMin": 78,
+    "expectedScoreMax": 92,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Define AI evaluation rubrics",
+        "resumeEvidence": "AI evaluation rubrics"
+      }
+    ]
+  }
+}

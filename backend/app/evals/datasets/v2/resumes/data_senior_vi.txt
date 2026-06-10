@@ -1,0 +1,6 @@
+Pham Data Platform
+Language: Vietnamese
+Experience: 8 years
+Skills: spark, python, sql, airflow, data modeling, governance
+Highlights:
+- X?y d?ng lakehouse Spark, chu?n h?a data contracts v? orchestration Airflow cho d? li?u t?i ch?nh.

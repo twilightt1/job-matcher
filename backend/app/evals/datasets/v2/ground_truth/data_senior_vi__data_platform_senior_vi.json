@@ -1,0 +1,54 @@
+{
+  "resumeId": "data_senior_vi",
+  "jobId": "data_platform_senior_vi",
+  "resumeParser": {
+    "expectedCandidateName": "Pham Data Platform",
+    "expectedSkills": [
+      "spark",
+      "python",
+      "sql",
+      "airflow",
+      "data modeling",
+      "governance"
+    ],
+    "expectedLanguages": [
+      "Vietnamese"
+    ],
+    "minYearsExperience": 8
+  },
+  "jobParser": {
+    "expectedTitle": "Senior Data Engineer",
+    "expectedCompany": "FinData VN",
+    "expectedRequiredSkills": [
+      "spark",
+      "python",
+      "airflow",
+      "data modeling"
+    ],
+    "expectedPreferredSkills": [
+      "governance",
+      "sql"
+    ],
+    "expectedSeniority": "senior"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "spark",
+      "python",
+      "airflow",
+      "data modeling",
+      "governance",
+      "sql"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 84,
+    "expectedScoreMax": 97,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build lakehouse pipelines",
+        "resumeEvidence": "lakehouse Spark"
+      }
+    ]
+  }
+}

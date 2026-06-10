@@ -1,0 +1,6 @@
+ML Engineer Midlevel
+Language: English
+Experience: 4 years
+Skills: python, pytorch, scikit-learn, mlflow, feature engineering, docker
+Highlights:
+- Built PyTorch ranking models, tracked experiments in MLflow, and containerized batch inference.

@@ -1,0 +1,51 @@
+{
+  "resumeId": "ml_junior_en",
+  "jobId": "ml_associate_en",
+  "resumeParser": {
+    "expectedCandidateName": "ML Associate Candidate",
+    "expectedSkills": [
+      "python",
+      "pandas",
+      "scikit-learn",
+      "notebooks"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 1
+  },
+  "jobParser": {
+    "expectedTitle": "Associate ML Engineer",
+    "expectedCompany": "Model Garden",
+    "expectedRequiredSkills": [
+      "python",
+      "scikit-learn",
+      "pandas"
+    ],
+    "expectedPreferredSkills": [
+      "mlflow",
+      "docker"
+    ],
+    "expectedSeniority": "junior"
+  },
+  "matching": {
+    "expectedScoreBand": "partial_match",
+    "expectedMatchedSkills": [
+      "python",
+      "scikit-learn",
+      "pandas"
+    ],
+    "expectedMissingSkills": [
+      "mlflow",
+      "docker"
+    ],
+    "expectedScoreMin": 60,
+    "expectedScoreMax": 79,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Train classical ML models",
+        "resumeEvidence": "scikit-learn classifiers"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "resumeId": "be_junior_en",
+  "jobId": "python_api_junior",
+  "resumeParser": {
+    "expectedCandidateName": "Junior Backend Candidate",
+    "expectedSkills": [
+      "python",
+      "fastapi",
+      "postgresql",
+      "pytest"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 1
+  },
+  "jobParser": {
+    "expectedTitle": "Junior Backend Engineer",
+    "expectedCompany": "APIWorks",
+    "expectedRequiredSkills": [
+      "python",
+      "fastapi",
+      "postgresql"
+    ],
+    "expectedPreferredSkills": [
+      "docker",
+      "redis"
+    ],
+    "expectedSeniority": "junior"
+  },
+  "matching": {
+    "expectedScoreBand": "partial_match",
+    "expectedMatchedSkills": [
+      "python",
+      "fastapi",
+      "postgresql"
+    ],
+    "expectedMissingSkills": [
+      "docker",
+      "redis"
+    ],
+    "expectedScoreMin": 62,
+    "expectedScoreMax": 80,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build Python APIs",
+        "resumeEvidence": "FastAPI endpoints with PostgreSQL"
+      }
+    ]
+  }
+}

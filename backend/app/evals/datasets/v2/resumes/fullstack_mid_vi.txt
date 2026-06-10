@@ -1,0 +1,6 @@
+Do Fullstack Product
+Language: Vietnamese
+Experience: 5 years
+Skills: next.js, fastapi, postgresql, typescript, python
+Highlights:
+- Ph?t tri?n s?n ph?m SaaS v?i Next.js frontend, FastAPI backend v? PostgreSQL schema design.

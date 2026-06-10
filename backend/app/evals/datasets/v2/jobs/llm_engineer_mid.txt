@@ -1,0 +1,7 @@
+LLM Application Engineer
+Company: PromptWorks
+Seniority: mid
+Required skills: python, llm, rag, embeddings
+Preferred skills: fastapi, evaluation
+Requirements:
+- Skill in Evaluate RAG application quality.

@@ -1,0 +1,54 @@
+{
+  "resumeId": "be_mid_en",
+  "jobId": "fastapi_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Backend Midlevel",
+    "expectedSkills": [
+      "python",
+      "fastapi",
+      "postgresql",
+      "redis",
+      "docker",
+      "sqlalchemy"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "Backend Engineer",
+    "expectedCompany": "Northstar Systems",
+    "expectedRequiredSkills": [
+      "python",
+      "fastapi",
+      "postgresql",
+      "sqlalchemy"
+    ],
+    "expectedPreferredSkills": [
+      "redis",
+      "docker"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "python",
+      "fastapi",
+      "postgresql",
+      "sqlalchemy",
+      "redis",
+      "docker"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 82,
+    "expectedScoreMax": 94,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Design async service APIs",
+        "resumeEvidence": "async FastAPI services with SQLAlchemy"
+      }
+    ]
+  }
+}

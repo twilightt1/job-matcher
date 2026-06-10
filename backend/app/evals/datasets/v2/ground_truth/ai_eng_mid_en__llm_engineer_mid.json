@@ -1,0 +1,54 @@
+{
+  "resumeId": "ai_eng_mid_en",
+  "jobId": "llm_engineer_mid",
+  "resumeParser": {
+    "expectedCandidateName": "AI Engineer Candidate",
+    "expectedSkills": [
+      "python",
+      "llm",
+      "rag",
+      "embeddings",
+      "fastapi",
+      "evaluation"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "LLM Application Engineer",
+    "expectedCompany": "PromptWorks",
+    "expectedRequiredSkills": [
+      "python",
+      "llm",
+      "rag",
+      "embeddings"
+    ],
+    "expectedPreferredSkills": [
+      "fastapi",
+      "evaluation"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "python",
+      "llm",
+      "rag",
+      "embeddings",
+      "fastapi",
+      "evaluation"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 84,
+    "expectedScoreMax": 97,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Evaluate RAG application quality",
+        "resumeEvidence": "offline evaluation reports"
+      }
+    ]
+  }
+}

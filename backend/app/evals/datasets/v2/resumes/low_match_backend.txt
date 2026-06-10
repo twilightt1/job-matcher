@@ -1,0 +1,6 @@
+Backend Only Candidate
+Language: English
+Experience: 3 years
+Skills: python, fastapi, postgresql, docker
+Highlights:
+- Implemented CRUD APIs and database migrations for business workflow tools.

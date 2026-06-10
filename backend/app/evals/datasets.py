@@ -29,10 +29,19 @@ class JobParserExpectation:
 
 
 @dataclass(slots=True)
+class SemanticMatchExpectation:
+    job_requirement: str
+    resume_evidence: str
+
+
+@dataclass(slots=True)
 class MatchingExpectation:
     expected_score_band: ScoreBand
     expected_matched_skills: list[str]
     expected_missing_skills: list[str]
+    expected_semantic_matches: list[SemanticMatchExpectation]
+    expected_score_min: int | None
+    expected_score_max: int | None
 
 
 @dataclass(slots=True)
@@ -141,7 +150,28 @@ def _load_matching_expectation(payload: dict[str, Any]) -> MatchingExpectation:
         expected_score_band=_read_str(raw, "expectedScoreBand"),
         expected_matched_skills=_read_str_list(raw, "expectedMatchedSkills"),
         expected_missing_skills=_read_str_list(raw, "expectedMissingSkills"),
+        expected_semantic_matches=_read_semantic_matches(raw),
+        expected_score_min=_read_optional_int(raw, "expectedScoreMin"),
+        expected_score_max=_read_optional_int(raw, "expectedScoreMax"),
     )
+
+
+def _read_semantic_matches(payload: dict[str, Any]) -> list[SemanticMatchExpectation]:
+    value = payload.get("expectedSemanticMatches", [])
+    if not isinstance(value, list):
+        raise ValueError("Field 'expectedSemanticMatches' must be an array")
+
+    matches: list[SemanticMatchExpectation] = []
+    for item in value:
+        if not isinstance(item, dict):
+            raise ValueError("Each expected semantic match must be an object")
+        matches.append(
+            SemanticMatchExpectation(
+                job_requirement=_read_str(item, "jobRequirement"),
+                resume_evidence=_read_str(item, "resumeEvidence"),
+            )
+        )
+    return matches
 
 
 def _dataset_root(dataset: str) -> Path:
@@ -192,6 +222,15 @@ def _read_optional_float(payload: dict[str, Any], key: str) -> float | None:
     if not isinstance(value, (float, int)):
         raise ValueError(f"Field {key!r} must be a number or null")
     return float(value)
+
+
+def _read_optional_int(payload: dict[str, Any], key: str) -> int | None:
+    value = payload.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, int):
+        raise ValueError(f"Field {key!r} must be an integer or null")
+    return value
 
 
 def _read_str_list(payload: dict[str, Any], key: str) -> list[str]:

@@ -1,0 +1,54 @@
+{
+  "resumeId": "fullstack_mid_vi",
+  "jobId": "fullstack_product_vi",
+  "resumeParser": {
+    "expectedCandidateName": "Do Fullstack Product",
+    "expectedSkills": [
+      "next.js",
+      "fastapi",
+      "postgresql",
+      "typescript",
+      "python"
+    ],
+    "expectedLanguages": [
+      "Vietnamese"
+    ],
+    "minYearsExperience": 5
+  },
+  "jobParser": {
+    "expectedTitle": "Fullstack Product Engineer",
+    "expectedCompany": "Mekong SaaS",
+    "expectedRequiredSkills": [
+      "next.js",
+      "fastapi",
+      "postgresql",
+      "typescript"
+    ],
+    "expectedPreferredSkills": [
+      "python",
+      "product analytics"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "next.js",
+      "fastapi",
+      "postgresql",
+      "typescript",
+      "python"
+    ],
+    "expectedMissingSkills": [
+      "product analytics"
+    ],
+    "expectedScoreMin": 80,
+    "expectedScoreMax": 94,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build fullstack SaaS features",
+        "resumeEvidence": "Next.js frontend, FastAPI backend"
+      }
+    ]
+  }
+}

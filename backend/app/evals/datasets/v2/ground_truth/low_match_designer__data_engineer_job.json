@@ -1,0 +1,52 @@
+{
+  "resumeId": "low_match_designer",
+  "jobId": "data_engineer_job",
+  "resumeParser": {
+    "expectedCandidateName": "Product Designer Candidate",
+    "expectedSkills": [
+      "figma",
+      "user research",
+      "prototyping",
+      "design systems"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 5
+  },
+  "jobParser": {
+    "expectedTitle": "Data Engineer",
+    "expectedCompany": "Warehouse Labs",
+    "expectedRequiredSkills": [
+      "python",
+      "sql",
+      "airflow",
+      "spark"
+    ],
+    "expectedPreferredSkills": [
+      "dbt",
+      "data modeling"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "weak_match",
+    "expectedMatchedSkills": [],
+    "expectedMissingSkills": [
+      "python",
+      "sql",
+      "airflow",
+      "spark",
+      "dbt",
+      "data modeling"
+    ],
+    "expectedScoreMin": 10,
+    "expectedScoreMax": 35,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build data pipelines",
+        "resumeEvidence": "Figma prototypes"
+      }
+    ]
+  }
+}

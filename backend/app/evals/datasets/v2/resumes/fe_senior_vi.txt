@@ -1,0 +1,6 @@
+Nguyen Frontend Lead
+Language: Vietnamese
+Experience: 7 years
+Skills: react, typescript, next.js, performance, accessibility, team leadership
+Highlights:
+- D?n d?t nh?m frontend x?y d?ng Next.js app, gi?m LCP 35% v? chu?n h?a accessibility review.

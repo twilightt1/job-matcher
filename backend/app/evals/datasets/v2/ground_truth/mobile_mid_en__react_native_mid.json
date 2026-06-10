@@ -1,0 +1,54 @@
+{
+  "resumeId": "mobile_mid_en",
+  "jobId": "react_native_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Mobile Engineer Candidate",
+    "expectedSkills": [
+      "react native",
+      "typescript",
+      "ios",
+      "android",
+      "rest api"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "React Native Engineer",
+    "expectedCompany": "PocketApps",
+    "expectedRequiredSkills": [
+      "react native",
+      "typescript",
+      "ios",
+      "android"
+    ],
+    "expectedPreferredSkills": [
+      "rest api",
+      "testing library"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "react native",
+      "typescript",
+      "ios",
+      "android",
+      "rest api"
+    ],
+    "expectedMissingSkills": [
+      "testing library"
+    ],
+    "expectedScoreMin": 80,
+    "expectedScoreMax": 93,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Ship cross-platform mobile features",
+        "resumeEvidence": "React Native features in TypeScript"
+      }
+    ]
+  }
+}

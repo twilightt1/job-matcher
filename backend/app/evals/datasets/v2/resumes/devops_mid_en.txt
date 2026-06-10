@@ -1,0 +1,6 @@
+Cloud DevOps Candidate
+Language: English
+Experience: 5 years
+Skills: aws, terraform, kubernetes, github actions, docker
+Highlights:
+- Provisioned AWS infrastructure with Terraform and deployed Docker services to Kubernetes.

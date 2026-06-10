@@ -1,0 +1,7 @@
+QA Automation Engineer
+Company: TestPilot
+Seniority: mid
+Required skills: playwright, python, api testing
+Preferred skills: pytest, ci
+Requirements:
+- Skill in Automate browser regression tests.

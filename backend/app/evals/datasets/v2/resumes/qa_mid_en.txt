@@ -1,0 +1,6 @@
+Automation QA Candidate
+Language: English
+Experience: 4 years
+Skills: playwright, pytest, python, api testing, ci
+Highlights:
+- Developed Playwright regression suites and Python API tests in CI pipelines.

@@ -1,0 +1,7 @@
+Junior Frontend Developer
+Company: BrightCart
+Seniority: junior
+Required skills: react, javascript, css
+Preferred skills: accessibility, rest api
+Requirements:
+- Skill in Build accessible React UI.

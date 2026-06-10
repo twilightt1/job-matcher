@@ -1,0 +1,55 @@
+{
+  "resumeId": "ml_mid_en",
+  "jobId": "ml_engineer_mid",
+  "resumeParser": {
+    "expectedCandidateName": "ML Engineer Midlevel",
+    "expectedSkills": [
+      "python",
+      "pytorch",
+      "scikit-learn",
+      "mlflow",
+      "feature engineering",
+      "docker"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "ML Engineer",
+    "expectedCompany": "SignalWorks",
+    "expectedRequiredSkills": [
+      "python",
+      "pytorch",
+      "mlflow",
+      "feature engineering"
+    ],
+    "expectedPreferredSkills": [
+      "docker",
+      "airflow"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "python",
+      "pytorch",
+      "mlflow",
+      "feature engineering",
+      "docker"
+    ],
+    "expectedMissingSkills": [
+      "airflow"
+    ],
+    "expectedScoreMin": 80,
+    "expectedScoreMax": 94,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Track experiments reproducibly",
+        "resumeEvidence": "tracked experiments in MLflow"
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+Junior AI Application Developer
+Company: Assistly VN
+Seniority: junior
+Required skills: python, prompt engineering, fastapi
+Preferred skills: json schema, embeddings
+Requirements:
+- Skill in Validate model output with JSON schema.

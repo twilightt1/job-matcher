@@ -1,0 +1,54 @@
+{
+  "resumeId": "devops_mid_en",
+  "jobId": "cloud_devops_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Cloud DevOps Candidate",
+    "expectedSkills": [
+      "aws",
+      "terraform",
+      "kubernetes",
+      "github actions",
+      "docker"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 5
+  },
+  "jobParser": {
+    "expectedTitle": "Cloud DevOps Engineer",
+    "expectedCompany": "OrbitOps",
+    "expectedRequiredSkills": [
+      "aws",
+      "terraform",
+      "kubernetes",
+      "docker"
+    ],
+    "expectedPreferredSkills": [
+      "github actions",
+      "prometheus"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "aws",
+      "terraform",
+      "kubernetes",
+      "docker",
+      "github actions"
+    ],
+    "expectedMissingSkills": [
+      "prometheus"
+    ],
+    "expectedScoreMin": 80,
+    "expectedScoreMax": 93,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Provision cloud infrastructure",
+        "resumeEvidence": "AWS infrastructure with Terraform"
+      }
+    ]
+  }
+}

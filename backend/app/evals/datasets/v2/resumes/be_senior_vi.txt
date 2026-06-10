@@ -1,0 +1,6 @@
+Tran Backend Platform
+Language: Vietnamese
+Experience: 8 years
+Skills: python, fastapi, postgresql, kubernetes, observability, system design
+Highlights:
+- Thi?t k? n?n t?ng backend FastAPI tr?n Kubernetes v?i tracing, metrics v? PostgreSQL tuning.

@@ -1,0 +1,6 @@
+AI Engineer Candidate
+Language: English
+Experience: 4 years
+Skills: python, llm, rag, embeddings, fastapi, evaluation
+Highlights:
+- Built RAG services with embeddings, FastAPI endpoints, and offline evaluation reports.

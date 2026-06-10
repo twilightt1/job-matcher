@@ -1,0 +1,6 @@
+Data Analyst Candidate
+Language: English
+Experience: 1 years
+Skills: sql, python, tableau, excel
+Highlights:
+- Built SQL dashboards and cleaned CSV datasets with Python for sales reporting.

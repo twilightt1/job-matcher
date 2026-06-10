@@ -1,0 +1,7 @@
+Backend Engineer
+Company: Northstar Systems
+Seniority: mid
+Required skills: python, fastapi, postgresql, sqlalchemy
+Preferred skills: redis, docker
+Requirements:
+- Skill in Design async service APIs.

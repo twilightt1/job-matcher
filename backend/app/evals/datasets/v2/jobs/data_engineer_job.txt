@@ -1,0 +1,7 @@
+Data Engineer
+Company: Warehouse Labs
+Seniority: mid
+Required skills: python, sql, airflow, spark
+Preferred skills: dbt, data modeling
+Requirements:
+- Skill in Build data pipelines.

@@ -1,0 +1,7 @@
+Senior ML Platform Engineer
+Company: VietAI Labs
+Seniority: senior
+Required skills: python, pytorch, mlflow, kubernetes, model monitoring
+Preferred skills: feature store
+Requirements:
+- Skill in Monitor model drift.

@@ -1,0 +1,51 @@
+{
+  "resumeId": "data_junior_en",
+  "jobId": "data_analyst_junior",
+  "resumeParser": {
+    "expectedCandidateName": "Data Analyst Candidate",
+    "expectedSkills": [
+      "sql",
+      "python",
+      "tableau",
+      "excel"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 1
+  },
+  "jobParser": {
+    "expectedTitle": "Junior Data Analyst",
+    "expectedCompany": "RetailSense",
+    "expectedRequiredSkills": [
+      "sql",
+      "excel",
+      "tableau"
+    ],
+    "expectedPreferredSkills": [
+      "python",
+      "statistics"
+    ],
+    "expectedSeniority": "junior"
+  },
+  "matching": {
+    "expectedScoreBand": "partial_match",
+    "expectedMatchedSkills": [
+      "sql",
+      "excel",
+      "tableau",
+      "python"
+    ],
+    "expectedMissingSkills": [
+      "statistics"
+    ],
+    "expectedScoreMin": 62,
+    "expectedScoreMax": 80,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Create BI dashboards",
+        "resumeEvidence": "SQL dashboards"
+      }
+    ]
+  }
+}

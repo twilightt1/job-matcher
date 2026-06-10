@@ -1,0 +1,6 @@
+Mai AI Assistant Junior
+Language: Vietnamese
+Experience: 1.5 years
+Skills: python, prompt engineering, fastapi, json schema
+Highlights:
+- X?y d?ng chatbot n?i b? d?ng prompt templates, JSON schema validation v? FastAPI API.

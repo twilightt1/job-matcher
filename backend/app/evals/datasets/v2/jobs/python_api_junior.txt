@@ -1,0 +1,7 @@
+Junior Backend Engineer
+Company: APIWorks
+Seniority: junior
+Required skills: python, fastapi, postgresql
+Preferred skills: docker, redis
+Requirements:
+- Skill in Build Python APIs.

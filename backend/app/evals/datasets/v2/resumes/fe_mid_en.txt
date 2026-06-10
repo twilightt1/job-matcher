@@ -1,0 +1,6 @@
+Frontend Midlevel
+Language: English
+Experience: 4 years
+Skills: react, typescript, css, rest api, accessibility, javascript
+Highlights:
+- Led a React TypeScript dashboard migration and improved keyboard navigation for WCAG AA flows.

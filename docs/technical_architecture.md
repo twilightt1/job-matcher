@@ -1,10 +1,10 @@
 # JobFit AI — Technical Architecture
 
-> **Phiên bản:** 0.3.0  
-> **Cập nhật:** 2026-06-14  
+> **Phiên bản:** 0.5.0  
+> **Cập nhật:** 2026-06-18  
 > **Phạm vi:** tài liệu mô tả kiến trúc hiện tại trong repository `job-matcher`.
-> Nội dung ưu tiên phản ánh code đang có, không mô tả tính năng chưa được nối vào
-> runtime trừ khi được ghi rõ là "planned" hoặc "not wired yet".
+> Nội dung ưu tiên phản ánh code đang có, bao gồm provider abstraction,
+> semantic embeddings, evaluation harness, CI, và fallback behavior.
 
 ## 1. Executive Summary
 
@@ -19,7 +19,8 @@ Kiến trúc hiện tại là **split frontend/backend**:
 
 - **Frontend:** Next.js 14 App Router, React 18, TypeScript, CSS thuần.
 - **Backend:** FastAPI, SQLAlchemy 2 async, PostgreSQL + pgvector, Alembic.
-- **AI/ML pipeline:** local deterministic clients + prompt contracts + AIRun audit.
+- **AI/ML pipeline:** OpenAI-compatible provider abstraction, local fallbacks,
+  pgvector embeddings, hybrid semantic/lexical matching, AIRun audit.
 - **Ingestion:** PDF/DOCX/TXT parser, public URL fetcher có SSRF guard.
 
 ```mermaid
@@ -46,13 +47,14 @@ job-matcher/
 │   │   │   ├── router.py           # Aggregate API routers
 │   │   │   └── routes/             # health, resumes, jobs, analyze, reports, optimizations
 │   │   ├── ai/
-│   │   │   ├── clients/            # Local parser/optimizer clients
-│   │   │   ├── guardrails/         # LocalTruthGuard
+│   │   │   ├── clients/            # Local + OpenAI-compatible parser/optimizer clients
+│   │   │   ├── embeddings/         # Embedding clients, indexing, semantic retrieval
+│   │   │   ├── guardrails/         # Local/LLM truth guard implementations
 │   │   │   ├── matching/           # Skill normalization helpers
 │   │   │   ├── pipeline/           # parse, match, optimize orchestration
 │   │   │   ├── prompts/            # Versioned prompt contracts (*.v1.md)
 │   │   │   ├── schemas/            # AI output Pydantic schemas
-│   │   │   └── scoring/            # DeterministicMatchEngine
+│   │   │   └── scoring/            # Hybrid semantic/lexical match engine
 │   │   ├── core/                   # Settings + logging
 │   │   ├── db/
 │   │   │   ├── models/             # 13 SQLAlchemy ORM models
@@ -81,6 +83,8 @@ job-matcher/
 │   ├── prd.md
 │   ├── prompt_design.md
 │   ├── evaluation_plan.md
+│   ├── model_card.md
+│   ├── provider_matrix.md
 │   └── technical_architecture.md
 ├── infra/
 │   ├── docker/                     # Backend/frontend Dockerfiles
@@ -127,11 +131,12 @@ shareable `/reports/[id]` route for the persisted report.
 | ORM | SQLAlchemy 2 declarative models |
 | Migration | Alembic |
 | JSON storage | PostgreSQL JSONB for parsed AI outputs and reports |
-| Vector-ready tables | `resume_embeddings`, `job_embeddings` |
+| Vector tables | `resume_embeddings`, `job_embeddings` |
 
-> **Important:** embedding tables and config exist, but the live matching flow
-> currently uses deterministic keyword/alias scoring. Runtime vector generation
-> is not wired yet.
+Embedding generation is wired into the one-shot analysis workflow. Resume bullets,
+skills, job skills, requirements, and responsibilities are indexed into pgvector
+rows before matching. Runtime uses local MiniLM when `backend[local-ml]` is
+installed and deterministic fallback embeddings otherwise.
 
 ## 4. Deployment / Local Runtime View
 
@@ -388,33 +393,46 @@ It returns a single payload containing:
 
 ## 10. AI Pipeline
 
-The live backend AI pipeline is local and deterministic-first.
-Although env vars for Gemini/OpenAI/Anthropic exist, current pipeline functions
-instantiate local clients directly.
+The live backend AI pipeline is provider-driven with local fallbacks. By default,
+it runs without API keys. When `AI_PROVIDER=openai`, the same OpenAI-compatible
+client can call OpenAI, Gemini's OpenAI-compatible endpoint, Ollama, vLLM,
+OpenRouter, LM Studio, or similar `/chat/completions` runtimes.
 
 ```mermaid
 sequenceDiagram
     participant UI as Frontend /analyze
     participant API as POST /api/analyze
     participant ING as Ingestion workflow
-    participant PARSE as Parsing pipeline
-    participant MATCH as DeterministicMatchEngine
-    participant OPT as Resume optimizer
+    participant PARSE as Parser factory
+    participant EMB as Embedding factory
+    participant MATCH as Hybrid match engine
+    participant OPT as Optimizer factory
     participant GUARD as Truth guard
-    participant DB as PostgreSQL
+    participant DB as PostgreSQL + pgvector
 
     UI->>API: multipart resume + JD input
     API->>ING: create resume/job from file, text or URL
     ING->>DB: persist Resume + Job
     API->>PARSE: parse_resume_record + parse_job_record
     PARSE->>DB: parsed_json + AIRun + AIOutput
+    API->>EMB: ensure_resume_embeddings + ensure_job_embeddings
+    EMB->>DB: replace resume/job embedding rows
     API->>MATCH: create_match_report_record
-    MATCH->>DB: MatchReport + MatchEvidence
+    MATCH->>DB: MatchReport + MatchEvidence with semantic metadata
     API->>OPT: optimize_resume_for_match
     OPT->>GUARD: evaluate each suggestion
     OPT->>DB: OptimizedResume + RewriteSuggestion + AIRun rows
     API-->>UI: AnalyzeRead response
 ```
+
+Provider and fallback behavior:
+
+| Layer | Default | Optional provider path |
+| --- | --- | --- |
+| Parser | Local deterministic parser | OpenAI-compatible chat completions |
+| Optimizer | Local deterministic optimizer | OpenAI-compatible chat completions |
+| Truth guard | Local rule guard | LLM entailment guard with local fallback |
+| Embeddings | Local sentence-transformer | Deterministic fallback if runtime unavailable |
 
 ### 10.1 Parsing
 
@@ -423,10 +441,12 @@ Entry functions:
 - `parse_resume_record(session, resume)`
 - `parse_job_record(session, job)`
 
-Current clients:
+Current client selection:
 
-- `LocalResumeParserClient`
-- `LocalJobParserClient`
+- `LocalResumeParserClient` / `LocalJobParserClient` when `AI_PROVIDER=local`.
+- `OpenAICompatLLMClient` when `AI_PROVIDER=openai`.
+- Pydantic schema validation is strict; failed JSON can be repaired with
+  `json_repair.v1.md` up to `LLM_MAX_REPAIR_ATTEMPTS`.
 
 Outputs are validated into AI schemas and persisted to:
 
@@ -445,11 +465,14 @@ The matching pipeline:
 
 1. Validate `resume.parsed_json` into `ResumeExtraction`.
 2. Validate `job.parsed_json` into `JobExtraction`.
-3. Run `DeterministicMatchEngine.compute()`.
-4. Persist one `MatchReport`.
-5. Persist many `MatchEvidence` rows.
+3. Load persisted resume/job embeddings when present.
+4. Build semantic skill and requirement matches by cosine similarity.
+5. Run `DeterministicMatchEngine.compute()` with semantic match maps.
+6. Persist one `MatchReport` with `hybrid-semantic-v1` metadata.
+7. Persist many `MatchEvidence` rows with lexical/semantic/hybrid metadata.
 
-Matching is deterministic and does not create an `AIRun`.
+Matching remains auditable and does not create an `AIRun`, but report metadata
+records embedding models/providers and semantic match counts.
 
 ### 10.3 Optimization
 
@@ -545,8 +568,8 @@ responsibilities, skills, and requirement text.
 Source: `backend/app/ai/guardrails/truth_guard.py`.
 
 Truth Guard prevents resume rewrite suggestions from adding unsupported claims.
-It compares important keywords in the suggested rewrite against parsed resume
-evidence.
+It can run as a local rule-based guard or as an OpenAI-compatible LLM entailment
+judge wrapped with local fallback behavior.
 
 ### 12.1 Truth statuses
 
@@ -631,12 +654,17 @@ The default env file is `.env`; examples live in `.env.example`.
 | `DATABASE_URL` | `postgresql+asyncpg://jobfit:jobfit@localhost:5432/jobfit` | Async runtime DB URL. |
 | `SYNC_DATABASE_URL` | `postgresql+psycopg://jobfit:jobfit@localhost:5432/jobfit` | Sync DB URL for Alembic/evals. |
 | `BACKEND_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated CORS origins. |
-| `AI_PROVIDER` | `gemini` | Provider setting exists; live pipeline currently uses local clients. |
-| `GEMINI_API_KEY` | empty | Future/provider integration key. |
-| `OPENAI_API_KEY` | empty | Future/provider integration key. |
-| `ANTHROPIC_API_KEY` | empty | Future/provider integration key. |
-| `EMBEDDING_PROVIDER` | `local` | Embedding config; runtime matching not wired to embeddings yet. |
-| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Intended local embedding model. |
+| `AI_PROVIDER` | `local` | `local` fallback or `openai` compatible chat client. |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat Completions base URL. |
+| `OPENAI_API_KEY` | empty | Required when `AI_PROVIDER=openai`. |
+| `LLM_MODEL` | `gpt-4o-mini` | Chat model name. |
+| `LLM_TEMPERATURE` | `0.0` | Deterministic structured output setting. |
+| `LLM_REQUEST_TIMEOUT_SECONDS` | `30` | Provider request timeout. |
+| `LLM_MAX_REPAIR_ATTEMPTS` | `2` | JSON/schema repair retry budget. |
+| `GEMINI_API_KEY` | empty | Present for compatibility; Gemini uses `OPENAI_API_KEY` with OpenAI-compatible endpoint. |
+| `ANTHROPIC_API_KEY` | empty | Reserved; native Anthropic client is not wired. |
+| `EMBEDDING_PROVIDER` | `local` | Local sentence-transformer path with deterministic fallback. |
+| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Local 384-dim embedding model. |
 | `EMBEDDING_DIMENSION` | `384` | Must match vector columns. |
 | `UPLOAD_STORAGE_DIR` | `storage/uploads` | Local upload storage root. |
 | `MAX_UPLOAD_BYTES` | `10000000` | Upload size limit in bytes. |
@@ -662,8 +690,8 @@ The default env file is `.env`; examples live in `.env.example`.
 - No antivirus scanning for uploaded files.
 - No OCR for scanned PDFs.
 - Local upload storage is not exposed through signed URLs.
-- External LLM provider selection is configured but not wired into live pipeline.
-- Vector embedding retrieval is schema-ready but not active in matching.
+- Native Anthropic provider selection is configured but not implemented.
+- OpenAI-compatible `/embeddings` provider is planned; current embedding runtime is local/fallback.
 - No background job queue; one-shot analyze runs synchronously in the request.
 
 ## 17. Testing and Quality Gates
@@ -674,18 +702,18 @@ Backend configuration:
 - mypy: strict mode.
 - pytest: async mode auto, tests under `app/tests`.
 
-Recent verification for the ingestion/analyze upgrade:
+Recent verification for Phase 5 packaging:
 
 | Check | Result |
 | --- | --- |
-| Backend tests | `19 passed` |
+| Backend tests | `60 passed, 1 warning` |
 | Backend Ruff | `All checks passed` |
-| Backend mypy | `Success: no issues found in 85 source files` |
-| Frontend TypeScript | `tsc --noEmit` passed |
-| `/analyze` browser load | HTTP 200 in Next dev server |
+| Backend mypy | `Success: no issues found in 105 source files` |
+| Eval smoke | `task=all`, `dataset=v2`, report generated |
+| Frontend verify | `npm run verify` target included in CI |
 
-Note: frontend `npm run lint` currently opens Next.js first-time ESLint setup
-because an ESLint config has not been created yet.
+GitHub Actions runs backend Ruff, mypy, pytest, eval smoke, and frontend
+`npm run verify` on pull requests and pushes to `main`.
 
 ## 18. Evaluation Harness
 
@@ -694,7 +722,7 @@ Evaluation code lives under `backend/app/evals/`.
 Primary command:
 
 ```bash
-python -m app.evals.runner --task all --dataset smoke
+python -m app.evals.runner --task all --dataset v2 --no-persist
 ```
 
 Supported tasks include:
@@ -713,8 +741,10 @@ Evaluation persistence:
 Report output pattern:
 
 ```text
-app/evals/reports/eval_report_{dataset}.md
+artifacts/eval_reports/eval_report_{dataset}.md
 ```
+
+Phase 5 CI uploads the `v2` eval report as a GitHub Actions artifact.
 
 ## 19. Known Architecture Decisions
 
@@ -722,8 +752,9 @@ app/evals/reports/eval_report_{dataset}.md
 | --- | --- |
 | Split frontend/backend | Keeps AI/ML logic server-side and frontend thin. |
 | PostgreSQL + JSONB | Easy persistence for evolving AI output schemas. |
-| pgvector-ready schema | Allows future semantic retrieval without replacing DB. |
-| Local deterministic clients | Makes MVP testable, cheap and reproducible. |
+| pgvector embeddings | Stores semantic evidence without replacing the relational model. |
+| Local fallback clients | Makes MVP testable, cheap and reproducible. |
+| Provider abstraction | Allows OpenAI-compatible LLM runtimes without changing pipelines. |
 | AIRun audit model | Enables prompt/output traceability and diagnostics. |
 | Truth guard before display | Reduces risk of fabricated resume claims. |
 | Synchronous one-shot analyze | Simpler UX/MVP; queue can be added later. |
@@ -732,14 +763,13 @@ app/evals/reports/eval_report_{dataset}.md
 
 The architecture leaves room for these upgrades:
 
-1. Wire `AI_PROVIDER` to real OpenAI/Gemini/Anthropic clients.
-2. Add async background jobs for long analyze/optimization flows.
-3. Generate and query embeddings for semantic evidence retrieval.
-4. Add OCR for scanned resumes/JDs.
-5. Implement auth and user-owned resources.
-6. Add report detail route, e.g. `/reports/[id]`.
-7. Add frontend ESLint config and component-level UI tests.
-8. Serve original uploads through secure signed URLs if needed.
+1. Add async background jobs for long analyze/optimization flows.
+2. Add OCR for scanned resumes/JDs.
+3. Implement auth and user-owned resources.
+4. Add frontend ESLint config and component-level UI tests.
+5. Add OpenAI-compatible `/embeddings` provider beside local MiniLM.
+6. Add threshold-based eval regression gates in CI.
+7. Serve original uploads through secure signed URLs if needed.
 
 ## 21. Cross References
 

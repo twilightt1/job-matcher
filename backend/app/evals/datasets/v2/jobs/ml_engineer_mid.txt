@@ -1,0 +1,7 @@
+ML Engineer
+Company: SignalWorks
+Seniority: mid
+Required skills: python, pytorch, mlflow, feature engineering
+Preferred skills: docker, airflow
+Requirements:
+- Skill in Track experiments reproducibly.

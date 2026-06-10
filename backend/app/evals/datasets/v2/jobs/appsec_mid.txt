@@ -1,0 +1,7 @@
+Application Security Engineer
+Company: ShieldPay
+Seniority: mid
+Required skills: owasp, threat modeling, api security
+Preferred skills: sast, python
+Requirements:
+- Skill in Review APIs for OWASP risks.

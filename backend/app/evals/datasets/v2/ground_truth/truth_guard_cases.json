@@ -1,0 +1,196 @@
+{
+  "cases": [
+    {
+      "caseId": "grounded_fastapi_rephrase",
+      "resumeText": "Backend Engineer\nSummary: Backend engineer building Python and FastAPI services.\nSkills: Python, FastAPI\n- Built FastAPI services for ML inference APIs.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Built FastAPI services for ML inference APIs.",
+        "suggested_text": "Built FastAPI services for ML inference APIs with Python backend integrations.",
+        "targeted_requirements": ["fastapi", "python"],
+        "keywords_added": ["fastapi", "python"],
+        "reason": "Emphasize already supported backend evidence.",
+        "estimated_score_lift": 4
+      },
+      "expectedTruthStatus": "safe",
+      "expectedNewClaims": []
+    },
+    {
+      "caseId": "grounded_mlflow_rephrase",
+      "resumeText": "ML Engineer\nSkills: Python, PyTorch, MLflow\n- Tracked PyTorch experiments in MLflow for ranking models.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Tracked PyTorch experiments in MLflow for ranking models.",
+        "suggested_text": "Tracked PyTorch ranking model experiments in MLflow with reproducible Python workflows.",
+        "targeted_requirements": ["pytorch", "mlflow"],
+        "keywords_added": ["pytorch", "mlflow"],
+        "reason": "Rephrase grounded ML evidence.",
+        "estimated_score_lift": 4
+      },
+      "expectedTruthStatus": "safe",
+      "expectedNewClaims": []
+    },
+    {
+      "caseId": "grounded_vietnamese_nextjs_rephrase",
+      "resumeText": "Frontend Lead\nSkills: React, TypeScript, Next.js\n- Dẫn dắt nhóm xây dựng Next.js app và cải thiện hiệu năng frontend.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Dẫn dắt nhóm xây dựng Next.js app và cải thiện hiệu năng frontend.",
+        "suggested_text": "Dẫn dắt nhóm frontend xây dựng Next.js app với React và TypeScript.",
+        "targeted_requirements": ["next.js", "react", "typescript"],
+        "keywords_added": ["next.js", "react", "typescript"],
+        "reason": "Clarify supported frontend stack.",
+        "estimated_score_lift": 5
+      },
+      "expectedTruthStatus": "safe",
+      "expectedNewClaims": []
+    },
+    {
+      "caseId": "unsupported_kubernetes_claim",
+      "resumeText": "Backend Engineer\nSummary: Backend engineer building Python APIs.\nSkills: Python\n- Built internal APIs for data tools.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Built internal APIs for data tools.",
+        "suggested_text": "Led a Kubernetes migration that increased revenue by millions.",
+        "targeted_requirements": ["kubernetes", "leadership"],
+        "keywords_added": ["kubernetes", "leadership"],
+        "reason": "Add stronger impact.",
+        "estimated_score_lift": 10
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["kubernetes", "increased", "revenue", "led"]
+    },
+    {
+      "caseId": "unsupported_revenue_metric",
+      "resumeText": "Product Analyst\nSkills: SQL, Tableau\n- Built dashboards for weekly sales reporting.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Built dashboards for weekly sales reporting.",
+        "suggested_text": "Built dashboards that increased annual revenue by 25 percent.",
+        "targeted_requirements": ["analytics", "business impact"],
+        "keywords_added": ["revenue", "25 percent"],
+        "reason": "Add quantified business impact.",
+        "estimated_score_lift": 9
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["increased", "revenue", "25 percent"]
+    },
+    {
+      "caseId": "unsupported_award_claim",
+      "resumeText": "QA Engineer\nSkills: Playwright, Python\n- Developed regression tests for checkout flows.\n",
+      "suggestion": {
+        "section_type": "summary",
+        "target_location": "summary",
+        "original_text": "QA engineer building automated regression tests.",
+        "suggested_text": "Awarded QA engineer recognized for industry-leading automation excellence.",
+        "targeted_requirements": ["qa automation"],
+        "keywords_added": ["awarded", "recognized"],
+        "reason": "Strengthen credibility.",
+        "estimated_score_lift": 8
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["awarded", "recognized", "industry-leading"]
+    },
+    {
+      "caseId": "needs_review_scope_expansion",
+      "resumeText": "Data Engineer\nSkills: Python, SQL, Airflow\n- Maintained daily Airflow DAGs for finance datasets.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Maintained daily Airflow DAGs for finance datasets.",
+        "suggested_text": "Owned production-grade Airflow data platform operations for finance datasets.",
+        "targeted_requirements": ["airflow", "data platform"],
+        "keywords_added": ["owned", "production-grade", "platform"],
+        "reason": "Emphasize operational responsibility.",
+        "estimated_score_lift": 6
+      },
+      "expectedTruthStatus": "needs_review",
+      "expectedNewClaims": ["owned", "production-grade", "platform"]
+    },
+    {
+      "caseId": "needs_review_team_leadership",
+      "resumeText": "Frontend Engineer\nSkills: React, TypeScript\n- Built React components for onboarding flows.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Built React components for onboarding flows.",
+        "suggested_text": "Led frontend delivery of React onboarding components across teams.",
+        "targeted_requirements": ["react", "leadership"],
+        "keywords_added": ["led", "across teams"],
+        "reason": "Add leadership framing.",
+        "estimated_score_lift": 7
+      },
+      "expectedTruthStatus": "needs_review",
+      "expectedNewClaims": ["led", "across teams"]
+    },
+    {
+      "caseId": "unsupported_security_compliance",
+      "resumeText": "Backend Developer\nSkills: Python, FastAPI\n- Implemented API endpoints for customer workflows.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Implemented API endpoints for customer workflows.",
+        "suggested_text": "Implemented SOC 2 compliant authentication APIs with zero security incidents.",
+        "targeted_requirements": ["security", "authentication"],
+        "keywords_added": ["soc 2", "authentication", "zero incidents"],
+        "reason": "Match security requirements.",
+        "estimated_score_lift": 10
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["soc 2", "authentication", "zero security incidents"]
+    },
+    {
+      "caseId": "unsupported_model_monitoring_claim",
+      "resumeText": "ML Engineer\nSkills: Python, scikit-learn\n- Trained classification models in notebooks.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Trained classification models in notebooks.",
+        "suggested_text": "Deployed model monitoring with drift detection on Kubernetes.",
+        "targeted_requirements": ["model monitoring", "kubernetes"],
+        "keywords_added": ["monitoring", "drift", "kubernetes"],
+        "reason": "Add MLOps relevance.",
+        "estimated_score_lift": 10
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["monitoring", "drift", "kubernetes"]
+    },
+    {
+      "caseId": "needs_review_numeric_latency_claim",
+      "resumeText": "Backend Engineer\nSkills: Python, Redis\n- Added Redis caching to API responses.\n",
+      "suggestion": {
+        "section_type": "experience",
+        "target_location": "experience_highlights[0]",
+        "original_text": "Added Redis caching to API responses.",
+        "suggested_text": "Added Redis caching that reduced API latency by 80 percent.",
+        "targeted_requirements": ["redis", "performance"],
+        "keywords_added": ["reduced", "80 percent"],
+        "reason": "Quantify performance impact.",
+        "estimated_score_lift": 8
+      },
+      "expectedTruthStatus": "needs_review",
+      "expectedNewClaims": ["reduced", "80 percent"]
+    },
+    {
+      "caseId": "unsupported_founder_claim",
+      "resumeText": "Fullstack Engineer\nSkills: Next.js, FastAPI\n- Built SaaS features for onboarding and billing.\n",
+      "suggestion": {
+        "section_type": "summary",
+        "target_location": "summary",
+        "original_text": "Fullstack engineer building SaaS product features.",
+        "suggested_text": "Founded and scaled a profitable SaaS platform using Next.js and FastAPI.",
+        "targeted_requirements": ["fullstack", "saas"],
+        "keywords_added": ["founded", "scaled", "profitable"],
+        "reason": "Add entrepreneurial impact.",
+        "estimated_score_lift": 10
+      },
+      "expectedTruthStatus": "unsupported",
+      "expectedNewClaims": ["founded", "scaled", "profitable"]
+    }
+  ]
+}

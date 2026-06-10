@@ -1,0 +1,7 @@
+Cloud DevOps Engineer
+Company: OrbitOps
+Seniority: mid
+Required skills: aws, terraform, kubernetes, docker
+Preferred skills: github actions, prometheus
+Requirements:
+- Skill in Provision cloud infrastructure.

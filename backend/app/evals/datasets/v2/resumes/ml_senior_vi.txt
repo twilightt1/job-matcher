@@ -1,0 +1,6 @@
+Le Senior ML Platform
+Language: Vietnamese
+Experience: 7 years
+Skills: python, pytorch, mlflow, kubernetes, model monitoring, feature store
+Highlights:
+- Tri?n khai pipeline hu?n luy?n PyTorch, model registry MLflow v? monitoring drift tr?n Kubernetes.

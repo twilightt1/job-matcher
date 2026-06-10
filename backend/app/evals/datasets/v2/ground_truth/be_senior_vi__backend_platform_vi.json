@@ -1,0 +1,54 @@
+{
+  "resumeId": "be_senior_vi",
+  "jobId": "backend_platform_vi",
+  "resumeParser": {
+    "expectedCandidateName": "Tran Backend Platform",
+    "expectedSkills": [
+      "python",
+      "fastapi",
+      "postgresql",
+      "kubernetes",
+      "observability",
+      "system design"
+    ],
+    "expectedLanguages": [
+      "Vietnamese"
+    ],
+    "minYearsExperience": 8
+  },
+  "jobParser": {
+    "expectedTitle": "Senior Backend Platform Engineer",
+    "expectedCompany": "Lotus Cloud",
+    "expectedRequiredSkills": [
+      "python",
+      "fastapi",
+      "kubernetes",
+      "observability"
+    ],
+    "expectedPreferredSkills": [
+      "postgresql",
+      "system design"
+    ],
+    "expectedSeniority": "senior"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "python",
+      "fastapi",
+      "kubernetes",
+      "observability",
+      "postgresql",
+      "system design"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 84,
+    "expectedScoreMax": 98,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Run services on Kubernetes",
+        "resumeEvidence": "FastAPI tr?n Kubernetes v?i tracing"
+      }
+    ]
+  }
+}

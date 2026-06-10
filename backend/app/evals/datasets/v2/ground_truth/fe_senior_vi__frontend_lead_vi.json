@@ -1,0 +1,54 @@
+{
+  "resumeId": "fe_senior_vi",
+  "jobId": "frontend_lead_vi",
+  "resumeParser": {
+    "expectedCandidateName": "Nguyen Frontend Lead",
+    "expectedSkills": [
+      "react",
+      "typescript",
+      "next.js",
+      "performance",
+      "accessibility",
+      "team leadership"
+    ],
+    "expectedLanguages": [
+      "Vietnamese"
+    ],
+    "minYearsExperience": 7
+  },
+  "jobParser": {
+    "expectedTitle": "Frontend Lead",
+    "expectedCompany": "Saigon Product Lab",
+    "expectedRequiredSkills": [
+      "react",
+      "typescript",
+      "next.js",
+      "performance"
+    ],
+    "expectedPreferredSkills": [
+      "accessibility",
+      "team leadership"
+    ],
+    "expectedSeniority": "senior"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "react",
+      "typescript",
+      "next.js",
+      "performance",
+      "accessibility",
+      "team leadership"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 84,
+    "expectedScoreMax": 97,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Improve Core Web Vitals",
+        "resumeEvidence": "gi?m LCP 35%"
+      }
+    ]
+  }
+}

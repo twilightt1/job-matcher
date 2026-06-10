@@ -1,0 +1,6 @@
+Mobile Engineer Candidate
+Language: English
+Experience: 4 years
+Skills: react native, typescript, ios, android, rest api
+Highlights:
+- Shipped React Native features in TypeScript for iOS and Android using REST APIs.

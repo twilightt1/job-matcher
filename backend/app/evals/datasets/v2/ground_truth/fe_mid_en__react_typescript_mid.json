@@ -1,0 +1,57 @@
+{
+  "resumeId": "fe_mid_en",
+  "jobId": "react_typescript_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Frontend Midlevel",
+    "expectedSkills": [
+      "react",
+      "typescript",
+      "css",
+      "rest api",
+      "accessibility",
+      "javascript"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "Mid Frontend Engineer",
+    "expectedCompany": "Pixel Forge",
+    "expectedRequiredSkills": [
+      "react",
+      "typescript",
+      "css",
+      "rest api",
+      "accessibility"
+    ],
+    "expectedPreferredSkills": [
+      "graphql",
+      "testing library"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "react",
+      "typescript",
+      "css",
+      "rest api",
+      "accessibility"
+    ],
+    "expectedMissingSkills": [
+      "graphql",
+      "testing library"
+    ],
+    "expectedScoreMin": 82,
+    "expectedScoreMax": 95,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build accessible TypeScript UI",
+        "resumeEvidence": "React TypeScript dashboard migration"
+      }
+    ]
+  }
+}

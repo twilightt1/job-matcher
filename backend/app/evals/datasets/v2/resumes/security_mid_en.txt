@@ -1,0 +1,6 @@
+Application Security Candidate
+Language: English
+Experience: 4 years
+Skills: owasp, python, sast, threat modeling, api security
+Highlights:
+- Performed threat modeling, SAST triage, and OWASP API security reviews for payment services.

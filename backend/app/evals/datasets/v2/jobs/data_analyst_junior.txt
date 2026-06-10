@@ -1,0 +1,7 @@
+Junior Data Analyst
+Company: RetailSense
+Seniority: junior
+Required skills: sql, excel, tableau
+Preferred skills: python, statistics
+Requirements:
+- Skill in Create BI dashboards.

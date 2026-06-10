@@ -1,0 +1,6 @@
+Analytics Engineer
+Language: English
+Experience: 4 years
+Skills: sql, dbt, bigquery, python, airflow
+Highlights:
+- Maintained dbt models in BigQuery and orchestrated daily data quality checks with Airflow.

@@ -1,0 +1,51 @@
+{
+  "resumeId": "ai_eng_junior_vi",
+  "jobId": "ai_assistant_junior_vi",
+  "resumeParser": {
+    "expectedCandidateName": "Mai AI Assistant Junior",
+    "expectedSkills": [
+      "python",
+      "prompt engineering",
+      "fastapi",
+      "json schema"
+    ],
+    "expectedLanguages": [
+      "Vietnamese"
+    ],
+    "minYearsExperience": 1.5
+  },
+  "jobParser": {
+    "expectedTitle": "Junior AI Application Developer",
+    "expectedCompany": "Assistly VN",
+    "expectedRequiredSkills": [
+      "python",
+      "prompt engineering",
+      "fastapi"
+    ],
+    "expectedPreferredSkills": [
+      "json schema",
+      "embeddings"
+    ],
+    "expectedSeniority": "junior"
+  },
+  "matching": {
+    "expectedScoreBand": "partial_match",
+    "expectedMatchedSkills": [
+      "python",
+      "prompt engineering",
+      "fastapi",
+      "json schema"
+    ],
+    "expectedMissingSkills": [
+      "embeddings"
+    ],
+    "expectedScoreMin": 63,
+    "expectedScoreMax": 82,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Validate model output with JSON schema",
+        "resumeEvidence": "JSON schema validation"
+      }
+    ]
+  }
+}

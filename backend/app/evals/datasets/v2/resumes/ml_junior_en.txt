@@ -1,0 +1,6 @@
+ML Associate Candidate
+Language: English
+Experience: 1 years
+Skills: python, pandas, scikit-learn, notebooks
+Highlights:
+- Trained scikit-learn classifiers in notebooks and analyzed datasets with pandas.

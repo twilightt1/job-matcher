@@ -1,0 +1,51 @@
+{
+  "resumeId": "fe_junior_en",
+  "jobId": "react_junior_en",
+  "resumeParser": {
+    "expectedCandidateName": "Junior Frontend Candidate",
+    "expectedSkills": [
+      "javascript",
+      "react",
+      "css",
+      "git"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 1.5
+  },
+  "jobParser": {
+    "expectedTitle": "Junior Frontend Developer",
+    "expectedCompany": "BrightCart",
+    "expectedRequiredSkills": [
+      "react",
+      "javascript",
+      "css"
+    ],
+    "expectedPreferredSkills": [
+      "accessibility",
+      "rest api"
+    ],
+    "expectedSeniority": "junior"
+  },
+  "matching": {
+    "expectedScoreBand": "partial_match",
+    "expectedMatchedSkills": [
+      "react",
+      "javascript",
+      "css"
+    ],
+    "expectedMissingSkills": [
+      "accessibility",
+      "rest api"
+    ],
+    "expectedScoreMin": 60,
+    "expectedScoreMax": 78,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build accessible React UI",
+        "resumeEvidence": "React components for a student marketplace"
+      }
+    ]
+  }
+}

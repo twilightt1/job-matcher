@@ -4,16 +4,24 @@ from pathlib import Path
 
 from app.evals.types import EvaluationRunReport
 
-REPORTS_DIR = Path(__file__).resolve().parent / "reports"
+REPORTS_DIR = Path(__file__).resolve().parents[3] / "artifacts" / "eval_reports"
 
 
 def render_markdown_report(report: EvaluationRunReport) -> str:
+    total_examples = sum(len(task.examples) for task in report.tasks)
+    judge_enabled = any(
+        "llm_judge" in example.details_json
+        for task in report.tasks
+        for example in task.examples
+    )
     lines: list[str] = [
         f"# Evaluation Report ({report.dataset})",
         "",
         f"- Requested task: `{report.requested_task}`",
         f"- Generated at: `{report.generated_at.isoformat()}`",
         f"- Persisted run id: `{report.persisted_run_id or 'not_persisted'}`",
+        f"- Evaluated examples: `{total_examples}`",
+        f"- LLM judge enabled: `{judge_enabled}`",
     ]
     if report.warnings:
         lines.extend(["", "## Warnings", ""])

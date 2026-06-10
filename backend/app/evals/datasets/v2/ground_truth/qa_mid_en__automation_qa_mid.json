@@ -1,0 +1,51 @@
+{
+  "resumeId": "qa_mid_en",
+  "jobId": "automation_qa_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Automation QA Candidate",
+    "expectedSkills": [
+      "playwright",
+      "pytest",
+      "python",
+      "api testing",
+      "ci"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "QA Automation Engineer",
+    "expectedCompany": "TestPilot",
+    "expectedRequiredSkills": [
+      "playwright",
+      "python",
+      "api testing"
+    ],
+    "expectedPreferredSkills": [
+      "pytest",
+      "ci"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "playwright",
+      "python",
+      "api testing",
+      "pytest",
+      "ci"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 80,
+    "expectedScoreMax": 94,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Automate browser regression tests",
+        "resumeEvidence": "Playwright regression suites"
+      }
+    ]
+  }
+}

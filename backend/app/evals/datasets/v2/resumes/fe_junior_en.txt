@@ -1,0 +1,6 @@
+Junior Frontend Candidate
+Language: English
+Experience: 1.5 years
+Skills: javascript, react, css, git
+Highlights:
+- Built accessible React components for a student marketplace using CSS modules and REST API data.

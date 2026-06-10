@@ -1,0 +1,7 @@
+React Native Engineer
+Company: PocketApps
+Seniority: mid
+Required skills: react native, typescript, ios, android
+Preferred skills: rest api, testing library
+Requirements:
+- Skill in Ship cross-platform mobile features.

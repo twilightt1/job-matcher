@@ -1,0 +1,7 @@
+Analytics Engineer
+Company: MetricFlow
+Seniority: mid
+Required skills: sql, dbt, bigquery
+Preferred skills: airflow, python
+Requirements:
+- Skill in Maintain dbt models.

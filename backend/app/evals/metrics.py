@@ -35,7 +35,11 @@ class MatchingMetrics:
     missing_skill_precision: float
     missing_skill_recall: float
     missing_skill_f1: float
+    semantic_match_precision: float
+    semantic_match_recall: float
+    semantic_match_f1: float
     score_band_accuracy: float
+    score_in_range_rate: float
     average_score_delta: float
     evaluated_examples: int
 
@@ -43,8 +47,11 @@ class MatchingMetrics:
 @dataclass(slots=True)
 class TruthGuardMetrics:
     risky_recall: float
+    unsupported_recall: float
     hallucination_rate: float
     safe_precision: float
+    status_accuracy: float
+    new_claim_detection_rate: float
     reviewed_case_rate: float
     evaluated_cases: int
 
@@ -62,7 +69,9 @@ class ParsingExampleResult:
 class MatchingExampleResult:
     matched_skill_counts: SkillConfusionCounts
     missing_skill_counts: SkillConfusionCounts
+    semantic_match_counts: SkillConfusionCounts
     score_band_correct: bool
+    score_in_expected_range: bool
     absolute_score_delta: int
 
 
@@ -72,7 +81,10 @@ class TruthGuardCaseResult:
     predicted_risky: bool
     expected_safe: bool
     predicted_safe: bool
+    expected_unsupported: bool
+    predicted_unsupported: bool
     expected_status_matches: bool
+    new_claims_match: bool
     unexpected_new_claims: bool
 
 
@@ -140,17 +152,32 @@ def compute_matching_metrics(results: Iterable[MatchingExampleResult]) -> Matchi
     total = len(result_list)
     matched_counts = _aggregate_skill_counts(result.matched_skill_counts for result in result_list)
     missing_counts = _aggregate_skill_counts(result.missing_skill_counts for result in result_list)
+    semantic_counts = _aggregate_skill_counts(
+        result.semantic_match_counts for result in result_list
+    )
 
     matched_precision = precision(matched_counts.true_positives, matched_counts.false_positives)
     matched_recall = recall(matched_counts.true_positives, matched_counts.false_negatives)
     missing_precision = precision(missing_counts.true_positives, missing_counts.false_positives)
     missing_recall = recall(missing_counts.true_positives, missing_counts.false_negatives)
+    semantic_precision = precision(
+        semantic_counts.true_positives,
+        semantic_counts.false_positives,
+    )
+    semantic_recall = recall(
+        semantic_counts.true_positives,
+        semantic_counts.false_negatives,
+    )
 
     average_score_delta = sum(
         result.absolute_score_delta for result in result_list
     ) / max(total, 1)
     score_band_accuracy = _fraction(
         sum(result.score_band_correct for result in result_list),
+        total,
+    )
+    score_in_range_rate = _fraction(
+        sum(result.score_in_expected_range for result in result_list),
         total,
     )
     return MatchingMetrics(
@@ -160,7 +187,11 @@ def compute_matching_metrics(results: Iterable[MatchingExampleResult]) -> Matchi
         missing_skill_precision=missing_precision,
         missing_skill_recall=missing_recall,
         missing_skill_f1=f1_score(missing_precision, missing_recall),
+        semantic_match_precision=semantic_precision,
+        semantic_match_recall=semantic_recall,
+        semantic_match_f1=f1_score(semantic_precision, semantic_recall),
         score_band_accuracy=score_band_accuracy,
+        score_in_range_rate=score_in_range_rate,
         average_score_delta=average_score_delta,
         evaluated_examples=total,
     )
@@ -173,14 +204,31 @@ def compute_truth_guard_metrics(results: Iterable[TruthGuardCaseResult]) -> Trut
     risky_fn = sum(result.expected_risky and not result.predicted_risky for result in result_list)
     safe_tp = sum(result.expected_safe and result.predicted_safe for result in result_list)
     safe_fp = sum((not result.expected_safe) and result.predicted_safe for result in result_list)
+    unsupported_tp = sum(
+        result.expected_unsupported and result.predicted_unsupported
+        for result in result_list
+    )
+    unsupported_fn = sum(
+        result.expected_unsupported and not result.predicted_unsupported
+        for result in result_list
+    )
 
     return TruthGuardMetrics(
         risky_recall=recall(risky_tp, risky_fn),
+        unsupported_recall=recall(unsupported_tp, unsupported_fn),
         hallucination_rate=_fraction(
             sum(result.unexpected_new_claims for result in result_list),
             total,
         ),
         safe_precision=precision(safe_tp, safe_fp),
+        status_accuracy=_fraction(
+            sum(result.expected_status_matches for result in result_list),
+            total,
+        ),
+        new_claim_detection_rate=_fraction(
+            sum(result.new_claims_match for result in result_list),
+            total,
+        ),
         reviewed_case_rate=_fraction(
             sum(result.predicted_risky for result in result_list),
             total,

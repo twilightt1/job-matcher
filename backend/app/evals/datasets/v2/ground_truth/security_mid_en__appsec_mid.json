@@ -1,0 +1,51 @@
+{
+  "resumeId": "security_mid_en",
+  "jobId": "appsec_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Application Security Candidate",
+    "expectedSkills": [
+      "owasp",
+      "python",
+      "sast",
+      "threat modeling",
+      "api security"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "Application Security Engineer",
+    "expectedCompany": "ShieldPay",
+    "expectedRequiredSkills": [
+      "owasp",
+      "threat modeling",
+      "api security"
+    ],
+    "expectedPreferredSkills": [
+      "sast",
+      "python"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "owasp",
+      "threat modeling",
+      "api security",
+      "sast",
+      "python"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 80,
+    "expectedScoreMax": 95,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Review APIs for OWASP risks",
+        "resumeEvidence": "OWASP API security reviews"
+      }
+    ]
+  }
+}

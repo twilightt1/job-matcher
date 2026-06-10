@@ -1,0 +1,53 @@
+{
+  "resumeId": "low_match_backend",
+  "jobId": "senior_ml_job",
+  "resumeParser": {
+    "expectedCandidateName": "Backend Only Candidate",
+    "expectedSkills": [
+      "python",
+      "fastapi",
+      "postgresql",
+      "docker"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 3
+  },
+  "jobParser": {
+    "expectedTitle": "Senior ML Engineer",
+    "expectedCompany": "DeepRank",
+    "expectedRequiredSkills": [
+      "pytorch",
+      "mlflow",
+      "feature store",
+      "model monitoring"
+    ],
+    "expectedPreferredSkills": [
+      "kubernetes",
+      "python"
+    ],
+    "expectedSeniority": "senior"
+  },
+  "matching": {
+    "expectedScoreBand": "weak_match",
+    "expectedMatchedSkills": [
+      "python"
+    ],
+    "expectedMissingSkills": [
+      "pytorch",
+      "mlflow",
+      "feature store",
+      "model monitoring",
+      "kubernetes"
+    ],
+    "expectedScoreMin": 25,
+    "expectedScoreMax": 48,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Build ML model monitoring",
+        "resumeEvidence": "CRUD APIs and database migrations"
+      }
+    ]
+  }
+}

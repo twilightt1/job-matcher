@@ -1,0 +1,51 @@
+{
+  "resumeId": "data_mid_en",
+  "jobId": "analytics_engineer_mid",
+  "resumeParser": {
+    "expectedCandidateName": "Analytics Engineer",
+    "expectedSkills": [
+      "sql",
+      "dbt",
+      "bigquery",
+      "python",
+      "airflow"
+    ],
+    "expectedLanguages": [
+      "English"
+    ],
+    "minYearsExperience": 4
+  },
+  "jobParser": {
+    "expectedTitle": "Analytics Engineer",
+    "expectedCompany": "MetricFlow",
+    "expectedRequiredSkills": [
+      "sql",
+      "dbt",
+      "bigquery"
+    ],
+    "expectedPreferredSkills": [
+      "airflow",
+      "python"
+    ],
+    "expectedSeniority": "mid"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "sql",
+      "dbt",
+      "bigquery",
+      "airflow",
+      "python"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 82,
+    "expectedScoreMax": 95,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Maintain dbt models",
+        "resumeEvidence": "dbt models in BigQuery"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+Backend Midlevel
+Language: English
+Experience: 4 years
+Skills: python, fastapi, postgresql, redis, docker, sqlalchemy
+Highlights:
+- Designed async FastAPI services with SQLAlchemy repositories and Redis caching.

@@ -1,0 +1,7 @@
+Senior Data Engineer
+Company: FinData VN
+Seniority: senior
+Required skills: spark, python, airflow, data modeling
+Preferred skills: governance, sql
+Requirements:
+- Skill in Build lakehouse pipelines.

@@ -1,0 +1,54 @@
+{
+  "resumeId": "ml_senior_vi",
+  "jobId": "senior_ml_platform_vi",
+  "resumeParser": {
+    "expectedCandidateName": "Le Senior ML Platform",
+    "expectedSkills": [
+      "python",
+      "pytorch",
+      "mlflow",
+      "kubernetes",
+      "model monitoring",
+      "feature store"
+    ],
+    "expectedLanguages": [
+      "Vietnamese"
+    ],
+    "minYearsExperience": 7
+  },
+  "jobParser": {
+    "expectedTitle": "Senior ML Platform Engineer",
+    "expectedCompany": "VietAI Labs",
+    "expectedRequiredSkills": [
+      "python",
+      "pytorch",
+      "mlflow",
+      "kubernetes",
+      "model monitoring"
+    ],
+    "expectedPreferredSkills": [
+      "feature store"
+    ],
+    "expectedSeniority": "senior"
+  },
+  "matching": {
+    "expectedScoreBand": "strong_match",
+    "expectedMatchedSkills": [
+      "python",
+      "pytorch",
+      "mlflow",
+      "kubernetes",
+      "model monitoring",
+      "feature store"
+    ],
+    "expectedMissingSkills": [],
+    "expectedScoreMin": 84,
+    "expectedScoreMax": 98,
+    "expectedSemanticMatches": [
+      {
+        "jobRequirement": "Monitor model drift",
+        "resumeEvidence": "monitoring drift tr?n Kubernetes"
+      }
+    ]
+  }
+}

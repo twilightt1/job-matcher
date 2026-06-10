@@ -1,0 +1,7 @@
+Associate ML Engineer
+Company: Model Garden
+Seniority: junior
+Required skills: python, scikit-learn, pandas
+Preferred skills: mlflow, docker
+Requirements:
+- Skill in Train classical ML models.

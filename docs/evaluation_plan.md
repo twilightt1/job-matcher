@@ -10,9 +10,11 @@ The evaluation harness exists to answer three questions, in order of priority:
 
 1. **Extraction quality:** Are `ResumeExtraction` and `JobExtraction` JSON
    outputs correct and stable?
-2. **Scoring quality:** Does the deterministic match engine produce scores that
-   agree with human-labelled ground truth?
-3. **Truth-guard quality:** Does the guard correctly flag unsupported
+2. **Scoring quality:** Does the hybrid semantic/lexical match engine produce
+   scores and evidence that agree with human-labelled ground truth?
+3. **Semantic retrieval quality:** Does embedding evidence recover labeled
+   semantic matches that lexical matching alone may miss?
+4. **Truth-guard quality:** Does the guard correctly flag unsupported
    resume rewrite suggestions?
 
 Harness code lives in [`backend/app/evals/`](../backend/app/evals/):
@@ -24,17 +26,19 @@ backend/app/evals/
 ├── metrics.py           # Precision/Recall/F1, score band classification
 ├── report.py            # Markdown report renderer
 ├── runner.py            # CLI entrypoint + EvaluationRunReport orchestration
+├── semantic.py          # Semantic eval match builder
 ├── types.py             # TaskEvaluationReport / EvaluationRunReport dataclasses
-└── datasets/            # JSON ground-truth files (gitignored secrets)
+└── datasets/            # JSON ground-truth files
     ├── ground_truth/*.json
     ├── resumes/*.txt
+    ├── jobs/*.txt
     └── truth_guard_cases.json
 ```
 
 ## 2. Supported Tasks / Task được hỗ trợ
 
 Runner CLI accepts one of `resume_parser`, `job_parser`, `matching`,
-`truth_guard`, or `all` (default for CI).
+`truth_guard`, or `all` (default for CI smoke).
 
 | Task | Input | Output | Source of truth |
 | --- | --- | --- | --- |
@@ -43,8 +47,9 @@ Runner CLI accepts one of `resume_parser`, `job_parser`, `matching`,
 | `matching` | Resume + job pair | Overall score + breakdown | Expected score band + matched/missing skills |
 | `truth_guard` | Resume text + suggestion draft | `TruthGuardDecision` | `truth_guard_cases.json` |
 
-The runner is the only allowed way to score; do not call parsers directly
-without writing the run to the `eval_runs` table.
+The runner is the preferred way to score. Use `--no-persist` for CI and local
+smoke runs that do not have a database available; omit it when you want to write
+`eval_runs` / `eval_results` records.
 
 ## 3. Datasets / Bộ dữ liệu
 
@@ -71,7 +76,7 @@ evals/datasets/
 - `resume_text`, `job_text` (loaded from `.txt` files)
 - `resume_expectation`: `expected_candidate_name`, `expected_skills`, `expected_languages`, `min_years_experience`
 - `job_expectation`: `expected_title`, `expected_company`, `expected_required_skills`, `expected_preferred_skills`, `expected_seniority`
-- `matching_expectation`: `expected_score_band` (`strong_match` / `partial_match` / `weak_match`), `expected_matched_skills`, `expected_missing_skills`
+- `matching_expectation`: `expected_score_band` (`strong_match` / `partial_match` / `weak_match`), `expected_score_min`, `expected_score_max`, `expected_matched_skills`, `expected_missing_skills`, and labeled semantic matches where available
 
 ### 3.2 Truth-guard dataset
 
@@ -115,7 +120,11 @@ punctuation, apply alias dictionary) before TP/FP/FN counting.
 | `missing_skill_recall` | TP / (TP + FN) | Không kê thiếu nhầm |
 | `missing_skill_f1` | 2PR / (P+R) | Tổng hợp |
 | `score_band_accuracy` | fraction đúng band (`strong` ≥80, `partial` ≥60, `weak` <60) | So khớp verdict |
-| `average_score_delta` | mean of `|predicted − expected_band_midpoint|` | Sai số trung bình |
+| `score_in_range_rate` | fraction nằm trong labeled score range | Kiểm tra calibration range |
+| `average_score_delta` | mean distance from expected range/band anchor | Sai số trung bình |
+| `semantic_match_precision` | TP / (TP + FP) trên semantic/hybrid evidence | Không match semantic nhầm |
+| `semantic_match_recall` | TP / (TP + FN) trên labeled semantic matches | Bắt semantic match thiếu |
+| `semantic_match_f1` | 2PR / (P+R) | Tổng hợp semantic quality |
 
 Score bands are defined in `app/evals/metrics.py:192`:
 
@@ -131,8 +140,11 @@ def classify_score_band(score: int) -> ScoreBand:
 | Metric | Formula | Mục đích |
 | --- | --- | --- |
 | `risky_recall` | risky_tp / (risky_tp + risky_fn) | Bắt suggestion có vấn đề |
+| `unsupported_recall` | unsupported_tp / (unsupported_tp + unsupported_fn) | Bắt hallucination phải reject |
 | `safe_precision` | safe_tp / (safe_tp + safe_fp) | Không block nhầm suggestion safe |
+| `status_accuracy` | exact status matches / total cases | Đúng nhãn safe/needs_review/unsupported |
 | `hallucination_rate` | count(unexpected_new_claims) / total | Đo guard có bỏ sót claim mới |
+| `new_claim_detection_rate` | exact new-claim set matches / total cases | Độ chính xác claim-level |
 | `reviewed_case_rate` | count(predicted_risky) / total | Có quá conservative không |
 
 ## 5. Runner CLI / Cách chạy
@@ -143,21 +155,29 @@ Từ `backend/`:
 # 1. Cài dev extras
 pip install -e ".[dev]"
 
-# 2. Đảm bảo DATABASE_URL trỏ về DB đã apply migration
-alembic upgrade head
+# 2. Chạy eval smoke không cần DB persistence
+python -m app.evals.runner --task all --dataset v2 --no-persist
 
-# 3. Chạy eval (default task = all, dataset = smoke)
-python -m app.evals.runner --task all --dataset smoke
+# 3. Nếu muốn persist kết quả, đảm bảo DB đã apply migration rồi bỏ --no-persist
+alembic upgrade head
+python -m app.evals.runner --task all --dataset v2
 
 # Hoặc chỉ một task
-python -m app.evals.runner --task matching --dataset smoke
+python -m app.evals.runner --task matching --dataset v2 --no-persist
+```
+
+Tùy chọn LLM-as-judge cho parser eval:
+
+```bash
+python -m app.evals.runner --task all --dataset v2 --with-llm-judge --no-persist
 ```
 
 Sau khi chạy:
 
-- File `app/evals/reports/eval_report_{dataset}.md` được sinh
+- File `artifacts/eval_reports/eval_report_{dataset}.md` được sinh
 - Nếu `persist=True` (mặc định), một `EvalRun` row + nhiều `EvalResult` rows
   được insert vào DB (cột `summary_json` chứa toàn bộ metric snapshot)
+- CI dùng `--no-persist` để không cần PostgreSQL trong smoke run
 
 ## 6. Report format / Định dạng report
 
@@ -182,17 +202,49 @@ Average latency: `{ms} ms`
 - **{example_id}** — `{status}` — {summary}
 ```
 
-## 7. CI integration (planned) / Tích hợp CI
+## 7. CI integration / Tích hợp CI
 
-Suggested next steps (not yet wired):
+Implemented in `.github/workflows/ci.yml`.
 
-- `pytest` test load `eval_report_*.md` và assert `skill_f1 >= 0.8`,
-  `risky_recall >= 0.9`, `hallucination_rate <= 0.1`
-- Diff report giữa 2 run liên tiếp để detect regression
-- Persist report file artifact trong GitHub Actions run
+Backend quality gates:
 
-## 8. Cross-References
+- `python -m ruff check app`
+- `python -m mypy app`
+- `python -m pytest -q`
+- `python -m app.evals.runner --task all --dataset v2 --no-persist`
+- upload `artifacts/eval_reports/eval_report_v2.md` as a workflow artifact
+
+Frontend quality gates:
+
+- `npm ci`
+- `npm run verify`
+
+Current CI intentionally uses deterministic fallback embeddings when local ML
+runtime is unavailable. This keeps PR checks fast and reproducible. Real MiniLM
+embedding performance should be measured by installing `backend[local-ml]` and
+rerunning the same eval command locally or in a heavier benchmark workflow.
+
+## 8. Latest v2 Snapshot
+
+Command:
+
+```powershell
+.\.venv\Scripts\python -m app.evals.runner --task all --dataset v2 --no-persist
+```
+
+| Area | Metric | Value |
+| --- | --- | --- |
+| Resume parser | Skill F1 | 100.0% |
+| Job parser | Skill F1 | 45.5% |
+| Matching | Matched skill F1 | 36.2% |
+| Matching | Semantic match F1 | 50.0% |
+| Matching | Score band accuracy | 54.5% |
+| Truth guard | Risky recall | 100.0% |
+| Truth guard | Unsupported recall | 66.7% |
+| Truth guard | Status accuracy | 41.7% |
+
+## 9. Cross-References
 
 - Per-prompt contracts & versions → [Prompt Design](prompt_design.md)
-- Hệ thống ghi log AI runs → [Technical Architecture](technical_architecture.md#9-observability--ai-runs)
+- Hệ thống ghi log AI runs → [Technical Architecture](technical_architecture.md#13-observability)
 - PRD scope & build status → [Product Requirements](prd.md)

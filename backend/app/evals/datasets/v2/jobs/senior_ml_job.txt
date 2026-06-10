@@ -1,0 +1,7 @@
+Senior ML Engineer
+Company: DeepRank
+Seniority: senior
+Required skills: pytorch, mlflow, feature store, model monitoring
+Preferred skills: kubernetes, python
+Requirements:
+- Skill in Build ML model monitoring.

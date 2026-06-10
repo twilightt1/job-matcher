@@ -2,7 +2,7 @@
 
 JobFit AI is a product-style AI engineering project that turns a resume and a job description into an explainable match report, evidence-backed gaps, ATS keyword coverage, and truth-guarded resume rewrite suggestions.
 
-It is intentionally scoped as a **portfolio/CV-ready product demo**, not a full SaaS platform. The goal is to demonstrate end-to-end AI product engineering: practical document ingestion, schema-first extraction, deterministic scoring, AI safety guardrails, observability foundations, and a polished Next.js user experience.
+It is intentionally scoped as a **portfolio/CV-ready product demo**, not a full SaaS platform. The goal is to demonstrate end-to-end AI product engineering: practical document ingestion, schema-first extraction, hybrid semantic/lexical scoring, AI safety guardrails, observability foundations, and a polished Next.js user experience.
 
 ## Product Story
 
@@ -38,13 +38,13 @@ Main frontend routes:
 | Area | What it demonstrates |
 | --- | --- |
 | Document ingestion | Resume/JD input via pasted text, PDF, DOCX, TXT, Markdown, or public JD URL |
-| Explainable scoring | Deterministic skill/requirement/experience/language breakdown with persisted evidence rows |
+| Explainable scoring | Hybrid semantic + lexical skill/requirement/experience/language breakdown with persisted evidence rows |
 | Language support | English, Vietnamese, Chinese, and Japanese detection for resume/JD language matching |
 | Resume optimization | Rewrite suggestions tied to match gaps and estimated score lift |
 | Truth guard | Suggestions classified as `safe`, `needs_review`, or `unsupported` to avoid invented claims |
 | Product UX | Polished landing page, live analyze workflow, sticky report actions, markdown export |
-| AI observability | AI run/output tables, parse diagnostics, prompt-version-ready architecture |
-| Evaluation foundation | Smoke datasets and CLI runner for parser, matching, and truth-guard checks |
+| AI observability | AI run/output tables, parse diagnostics, provider/model/repair metadata, embedding metadata |
+| Evaluation foundation | Smoke datasets and CLI runner for parser, matching, semantic retrieval, and truth-guard checks |
 
 ## Architecture
 
@@ -62,8 +62,9 @@ Runtime flow:
 Next.js /analyze
   -> POST /api/analyze multipart form
   -> ingestion layer extracts file/text/url content
-  -> local parser creates resume/job structured JSON
-  -> deterministic match engine creates MatchReport + MatchEvidence
+  -> configured parser creates resume/job structured JSON
+  -> embedding service indexes resume bullets + job skills/requirements
+  -> hybrid match engine creates MatchReport + MatchEvidence
   -> optimizer creates RewriteSuggestion rows
   -> truth guard labels suggestion safety
   -> Next.js /reports/{id} reads and presents the final report
@@ -75,12 +76,54 @@ Next.js /analyze
 | --- | --- |
 | Frontend | Next.js 14 App Router, React 18, TypeScript, vanilla CSS |
 | Backend | FastAPI, SQLAlchemy 2 async, Pydantic, Alembic |
-| Database | PostgreSQL 16, pgvector-ready schema, JSONB report storage |
-| AI pipeline | Local deterministic parsers/optimizer by default, prompt/provider abstractions reserved |
+| Database | PostgreSQL 16, pgvector embeddings, JSONB report storage |
+| AI pipeline | Local deterministic fallback by default, OpenAI-compatible LLM abstraction, local sentence-transformer embeddings |
 | Ingestion | PDF/DOCX/TXT extraction, SSRF-aware public URL fetcher |
-| Quality | TypeScript strict mode, Ruff/Mypy/Pytest backend config, eval harness |
+| Quality | GitHub Actions CI, TypeScript strict mode, Ruff/Mypy/Pytest backend gates, eval harness |
 
-> The live matching flow currently uses deterministic keyword/alias scoring. The pgvector schema is present for future semantic evidence retrieval, but runtime vector retrieval is not required for the current product demo.
+## AI/ML Architecture
+
+- **Provider abstraction:** parsing, optimization, truth guard, and embeddings use swappable client/factory layers.
+- **Structured LLM path:** OpenAI-compatible chat completions support strict Pydantic schemas, JSON-repair retry, usage metadata, and provider/model observability.
+- **Embeddings:** default model is `sentence-transformers/all-MiniLM-L6-v2` with 384-dimensional vectors stored in `resume_embeddings` and `job_embeddings`.
+- **Clone-and-run fallback:** if optional local ML dependencies are missing, deterministic fallback embeddings keep analysis/eval flows runnable and record fallback metadata.
+- **Hybrid matching:** semantic cosine similarity augments lexical keyword/alias overlap; evidence rows use `semantic` or `hybrid` match types with similarity scores and embedding metadata.
+- **Evaluation:** the CLI runner reports parser, matching, semantic, and truth-guard metrics and writes markdown reports under `artifacts/eval_reports/`.
+
+```mermaid
+flowchart LR
+    Input["Resume + job input"] --> Ingest["Ingestion"]
+    Ingest --> Parse["Schema-first parser\nlocal or OpenAI-compatible"]
+    Parse --> Embed["Embedding indexing\nMiniLM or deterministic fallback"]
+    Embed --> Retrieve["Semantic retrieval\ncosine similarity"]
+    Parse --> Lexical["Lexical aliases\nkeyword overlap"]
+    Retrieve --> Match["Hybrid match engine"]
+    Lexical --> Match
+    Match --> Evidence["Persisted evidence rows"]
+    Evidence --> Optimize["Resume optimizer"]
+    Optimize --> Guard["Truth guard"]
+    Guard --> Eval["Eval harness + CI"]
+```
+
+Latest local eval snapshot (`--task all --dataset v2 --no-persist`, deterministic embedding fallback because `sentence_transformers` was unavailable):
+
+| Area | Metric | Value |
+| --- | --- | --- |
+| Resume parser | JSON/schema pass rate | 100.0% / 100.0% |
+| Resume parser | Skill F1 | 100.0% |
+| Job parser | JSON/schema pass rate | 100.0% / 100.0% |
+| Job parser | Skill F1 | 45.5% |
+| Matching | Matched skill F1 | 36.2% |
+| Matching | Semantic match F1 | 50.0% |
+| Matching | Score band accuracy | 54.5% |
+| Truth guard | Risky recall / safe precision | 100.0% / 100.0% |
+| Truth guard | Unsupported recall / status accuracy | 66.7% / 41.7% |
+
+Phase 5 packaging adds a model/system card, provider matrix, and CI workflow:
+
+- [Model card](docs/model_card.md)
+- [Provider matrix](docs/provider_matrix.md)
+- [Evaluation plan](docs/evaluation_plan.md)
 
 ## Local Development
 
@@ -151,6 +194,8 @@ python -m venv .venv
 .venv\Scripts\activate
 python -m pip install --upgrade pip
 pip install -e ".[dev]"
+# Optional: install local sentence-transformer runtime for real embeddings.
+pip install -e ".[dev,local-ml]"
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
@@ -168,20 +213,23 @@ uvicorn app.main:app --reload
 
 Suggested project line:
 
-> Built JobFit AI, an AI-powered resume-to-job matching product that ingests resumes and job descriptions, extracts structured signals, generates explainable match reports, and produces truth-guarded optimization suggestions using Next.js, FastAPI, PostgreSQL, and schema-first AI pipelines.
+> Built JobFit AI, an AI-powered resume-to-job matching system with schema-first OpenAI-compatible LLM pipelines, JSON-repair self-correction, pgvector-backed semantic matching, truth-guarded resume optimization, and CI-backed evaluation reporting.
 
 Impact bullets:
 
 - Designed an end-to-end CV/JD analysis pipeline from document ingestion to shareable report UX.
-- Implemented explainable deterministic scoring with persisted requirement-level evidence rows.
-- Built truth-guarded resume rewrite suggestions to reduce unsupported or hallucinated claims.
-- Created a polished no-account product demo with markdown export and reusable API/type layers.
-- Added AI observability and evaluation foundations for prompt/schema quality tracking.
+- Implemented schema-first LLM extraction/optimization with JSON-repair self-correction and local fallbacks.
+- Implemented explainable hybrid semantic/lexical scoring with persisted requirement-level evidence rows.
+- Added pgvector-backed embedding tables, local sentence-transformer indexing, and deterministic fallback embeddings for clone-and-run demos.
+- Built truth-guarded resume rewrite suggestions with local and LLM-entailment guard paths to reduce unsupported or hallucinated claims.
+- Added an eval harness with parser/matching/semantic/truth-guard metrics, model/provider docs, and GitHub Actions CI quality gates.
 
 More detail:
 
 - [Case study](docs/case_study.md)
 - [CV summary](docs/cv_summary.md)
+- [Model card](docs/model_card.md)
+- [Provider matrix](docs/provider_matrix.md)
 - [PRD](docs/prd.md)
 - [Technical architecture](docs/technical_architecture.md)
 - [Evaluation plan](docs/evaluation_plan.md)

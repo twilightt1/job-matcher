@@ -1,0 +1,7 @@
+Frontend Lead
+Company: Saigon Product Lab
+Seniority: senior
+Required skills: react, typescript, next.js, performance
+Preferred skills: accessibility, team leadership
+Requirements:
+- Skill in Improve Core Web Vitals.

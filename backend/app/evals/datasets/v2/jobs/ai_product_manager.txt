@@ -1,0 +1,7 @@
+AI Product Manager
+Company: ModelOps Co
+Seniority: senior
+Required skills: product strategy, ai evaluation, analytics
+Preferred skills: llm, stakeholder management
+Requirements:
+- Skill in Define AI evaluation rubrics.

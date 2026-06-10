@@ -1,0 +1,7 @@
+Mid Frontend Engineer
+Company: Pixel Forge
+Seniority: mid
+Required skills: react, typescript, css, rest api, accessibility
+Preferred skills: graphql, testing library
+Requirements:
+- Skill in Build accessible TypeScript UI.

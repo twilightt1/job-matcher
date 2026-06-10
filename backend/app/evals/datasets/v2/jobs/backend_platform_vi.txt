@@ -1,0 +1,7 @@
+Senior Backend Platform Engineer
+Company: Lotus Cloud
+Seniority: senior
+Required skills: python, fastapi, kubernetes, observability
+Preferred skills: postgresql, system design
+Requirements:
+- Skill in Run services on Kubernetes.

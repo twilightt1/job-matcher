@@ -1,0 +1,6 @@
+Junior Backend Candidate
+Language: English
+Experience: 1 years
+Skills: python, fastapi, postgresql, pytest
+Highlights:
+- Created FastAPI endpoints with PostgreSQL queries and pytest coverage for internal tools.
