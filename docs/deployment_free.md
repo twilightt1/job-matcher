@@ -108,19 +108,21 @@ Backend đã có logic tự normalize URL:
 
 Vì vậy không cần tự sửa driver trong Render dashboard.
 
-## 4. Chạy database migration
+## 4. Chạy database migration trên Render Free
 
-Sau khi Render tạo database xong, cần chạy migration một lần.
+Render Free có thể không cho dùng Shell. Vì vậy backend container đã được cấu hình để tự chạy migration trước khi start FastAPI:
 
-### Cách chạy trên Render Shell
+```dockerfile
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+```
 
-1. Mở Render service `jobfit-ai-backend`.
-2. Vào tab **Shell**.
-3. Chạy:
+Khi Render deploy/redeploy backend, app sẽ tự chạy:
 
 ```bash
 alembic upgrade head
 ```
+
+Sau đó mới start API server.
 
 Migration đầu tiên có dòng:
 
@@ -132,7 +134,12 @@ Vì vậy database phải hỗ trợ extension `vector`/pgvector.
 
 ### Kiểm tra migration thành công
 
-Nếu migration chạy thành công, command kết thúc không báo lỗi. Sau đó health check backend:
+Vì không có Shell, kiểm tra bằng logs và health endpoint:
+
+1. Vào Render service `jobfit-ai-backend`.
+2. Mở tab **Logs**.
+3. Tìm log Alembic dạng `Running upgrade` hoặc không có lỗi migration.
+4. Mở health check:
 
 ```text
 https://your-backend.onrender.com/health
@@ -143,6 +150,8 @@ Kết quả mong đợi:
 ```json
 {"status":"ok"}
 ```
+
+Nếu migration lỗi, backend sẽ không start. Khi đó xem lỗi trong Render Logs.
 
 ## 5. Deploy frontend trên Vercel
 
@@ -243,7 +252,7 @@ Kiểm tra các route chính:
 Đảm bảo `infra/docker/backend.Dockerfile` dùng dynamic port:
 
 ```dockerfile
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
 ```
 
 Không hardcode port `8000` khi deploy Render.
@@ -276,11 +285,8 @@ Database đang dùng không hỗ trợ pgvector. Cách xử lý:
 
 1. Dùng provider PostgreSQL có hỗ trợ pgvector.
 2. Hoặc bật extension `vector` nếu provider cho phép.
-3. Sau đó chạy lại:
-
-```bash
-alembic upgrade head
-```
+3. Push code và redeploy backend để container tự chạy lại migration.
+4. Xem Render Logs để kiểm tra migration đã chạy thành công.
 
 ### Vercel build lỗi vì gọi sai root directory
 
@@ -351,10 +357,10 @@ Checklist ngắn:
 
 1. Push code lên GitHub.
 2. Render → New Blueprint → chọn repo → deploy `render.yaml`.
-3. Render Shell → chạy `alembic upgrade head`.
+3. Render backend sẽ tự chạy `alembic upgrade head` khi start.
 4. Vercel → Import repo → Root Directory `frontend`.
 5. Vercel env → set `NEXT_PUBLIC_API_BASE_URL`.
 6. Deploy frontend.
 7. Render env → set `BACKEND_CORS_ORIGINS` bằng Vercel URL.
-8. Restart backend.
+8. Restart/redeploy backend để cập nhật CORS và tự chạy migration.
 9. Test `/health` và `/analyze`.
