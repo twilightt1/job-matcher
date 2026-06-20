@@ -337,8 +337,8 @@ def test_jina_embedding_client_posts_to_embeddings_endpoint(monkeypatch: Any) ->
         def json(self) -> dict[str, Any]:
             return {
                 "data": [
-                    {"index": 0, "embedding": [0.1, 0.2, 0.3]},
-                    {"index": 1, "embedding": [0.4, 0.5, 0.6]},
+                    {"index": 0, "embedding": [1.0, 2.0, 2.0, 99.0]},
+                    {"index": 1, "embedding": [2.0, 0.0, 0.0, 99.0]},
                 ]
             }
 
@@ -378,12 +378,16 @@ def test_jina_embedding_client_posts_to_embeddings_endpoint(monkeypatch: Any) ->
     assert result.provider == "jina"
     assert result.model_name == "jina-embeddings-v3"
     assert result.dimension == 3
-    assert result.vectors == [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+    assert result.vectors == [pytest.approx([1 / 3, 2 / 3, 2 / 3]), [1.0, 0.0, 0.0]]
     assert result.metadata["runtime"] == "jina_api"
+    assert result.metadata["requested_dimensions"] == 3
+    assert result.metadata["source_dimension"] == 4
     assert calls[0] == {"timeout": 12}
     assert calls[1]["url"] == "https://api.jina.ai/v1/embeddings"
     assert calls[1]["json"] == {
         "model": "jina-embeddings-v3",
+        "task": "retrieval.passage",
+        "normalized": True,
         "input": ["python api", "fastapi services"],
     }
     assert calls[1]["headers"]["Authorization"] == "Bearer test-key"

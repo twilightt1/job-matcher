@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.db.session import engine
+from app.db.vector_schema import ensure_embedding_vector_schema
 
 configure_logging()
 settings = get_settings()
@@ -21,5 +23,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def sync_embedding_vector_schema() -> None:
+    await ensure_embedding_vector_schema(engine, settings)
+
 
 app.include_router(api_router)

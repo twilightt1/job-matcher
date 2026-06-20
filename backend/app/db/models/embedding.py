@@ -9,7 +9,10 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.config import get_settings
 from app.db.session import Base
+
+EMBEDDING_DIMENSION = get_settings().embedding_dimension
 
 
 class ResumeEmbedding(Base):
@@ -25,10 +28,10 @@ class ResumeEmbedding(Base):
     section_id: Mapped[str | None] = mapped_column(String(120))
     text: Mapped[str] = mapped_column(Text)
 
-    embedding = mapped_column(Vector(384))
+    embedding = mapped_column(Vector(EMBEDDING_DIMENSION))
     embedding_model: Mapped[str] = mapped_column(String(255), index=True)
     embedding_version: Mapped[str] = mapped_column(String(80))
-    dimension: Mapped[int] = mapped_column(Integer, default=384)
+    dimension: Mapped[int] = mapped_column(Integer, default=lambda: EMBEDDING_DIMENSION)
     metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -47,10 +50,10 @@ class JobEmbedding(Base):
     requirement_id: Mapped[str | None] = mapped_column(String(120))
     text: Mapped[str] = mapped_column(Text)
 
-    embedding = mapped_column(Vector(384))
+    embedding = mapped_column(Vector(EMBEDDING_DIMENSION))
     embedding_model: Mapped[str] = mapped_column(String(255), index=True)
     embedding_version: Mapped[str] = mapped_column(String(80))
-    dimension: Mapped[int] = mapped_column(Integer, default=384)
+    dimension: Mapped[int] = mapped_column(Integer, default=lambda: EMBEDDING_DIMENSION)
     metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

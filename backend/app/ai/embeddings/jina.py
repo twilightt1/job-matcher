@@ -34,6 +34,8 @@ class JinaEmbeddingClient(EmbeddingClient):
 
         payload = {
             "model": self.model_name,
+            "task": "retrieval.passage",
+            "normalized": True,
             "input": texts,
         }
         started_at = perf_counter()
@@ -49,7 +51,8 @@ class JinaEmbeddingClient(EmbeddingClient):
         latency_ms = max(0, round((perf_counter() - started_at) * 1000))
         response.raise_for_status()
 
-        vectors = self._extract_embeddings(response.json())
+        raw_vectors = self._extract_embeddings(response.json())
+        vectors = self._coerce_dimensions(raw_vectors)
         self._validate_dimensions(vectors)
         return EmbeddingBatchResult(
             provider=self.provider,
@@ -60,6 +63,8 @@ class JinaEmbeddingClient(EmbeddingClient):
                 "runtime": "jina_api",
                 "latency_ms": latency_ms,
                 "endpoint": self._url,
+                "requested_dimensions": self.dimension,
+                "source_dimension": len(raw_vectors[0]) if raw_vectors else self.dimension,
             },
         )
 
@@ -76,6 +81,23 @@ class JinaEmbeddingClient(EmbeddingClient):
                 raise ValueError("Jina embeddings response item did not include an embedding list.")
             vectors.append([float(value) for value in embedding])
         return vectors
+
+    def _coerce_dimensions(self, vectors: list[list[float]]) -> list[list[float]]:
+        coerced_vectors: list[list[float]] = []
+        for vector in vectors:
+            if len(vector) > self.dimension:
+                coerced_vectors.append(vector[: self.dimension])
+            elif len(vector) < self.dimension:
+                coerced_vectors.append(vector + [0.0] * (self.dimension - len(vector)))
+            else:
+                coerced_vectors.append(vector)
+        return [self._normalize(vector) for vector in coerced_vectors]
+
+    def _normalize(self, vector: list[float]) -> list[float]:
+        norm = sum(value * value for value in vector) ** 0.5
+        if norm == 0.0:
+            return vector
+        return [value / norm for value in vector]
 
     def _validate_dimensions(self, vectors: list[list[float]]) -> None:
         for vector in vectors:
