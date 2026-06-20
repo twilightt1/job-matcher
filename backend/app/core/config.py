@@ -49,6 +49,14 @@ class Settings(BaseSettings):
         alias="EMBEDDING_MODEL",
     )
     embedding_dimension: int = Field(default=384, alias="EMBEDDING_DIMENSION")
+    embedding_request_timeout_seconds: float = Field(
+        default=30.0,
+        alias="EMBEDDING_REQUEST_TIMEOUT_SECONDS",
+    )
+    cohere_api_key: str | None = Field(default=None, alias="COHERE_API_KEY")
+    cohere_base_url: str = Field(default="https://api.cohere.com", alias="COHERE_BASE_URL")
+    jina_api_key: str | None = Field(default=None, alias="JINA_API_KEY")
+    jina_base_url: str = Field(default="https://api.jina.ai", alias="JINA_BASE_URL")
 
     upload_storage_dir: str = Field(default="storage/uploads", alias="UPLOAD_STORAGE_DIR")
     max_upload_bytes: int = Field(default=10_000_000, alias="MAX_UPLOAD_BYTES")

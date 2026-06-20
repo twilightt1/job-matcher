@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.ai.embeddings.base import EmbeddingClient
+from app.ai.embeddings.cohere import CohereEmbeddingClient
 from app.ai.embeddings.deterministic import DeterministicEmbeddingClient
+from app.ai.embeddings.jina import JinaEmbeddingClient
 from app.ai.embeddings.local import LocalEmbeddingClient
 from app.core.config import Settings
 
@@ -29,6 +31,12 @@ def get_embedding_client(settings: Settings) -> EmbeddingClientSelection:
                 ),
                 warning=warning,
             )
+
+    if settings.embedding_provider == "cohere":
+        return EmbeddingClientSelection(client=CohereEmbeddingClient(settings))
+
+    if settings.embedding_provider == "jina":
+        return EmbeddingClientSelection(client=JinaEmbeddingClient(settings))
 
     warning = (
         f"Unsupported embedding provider '{settings.embedding_provider}'; "
